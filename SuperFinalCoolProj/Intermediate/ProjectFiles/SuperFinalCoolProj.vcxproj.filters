@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <None Include="..\..\SuperFinalCoolProj.uproject" />
+    <Filter Include="Source">
+      <UniqueIdentifier>{F31BBDD1-B3E8-3BCC-9652-680E16935819}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Source\SuperFinalCoolProj.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="..\..\Source\SuperFinalCoolProjEditor.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="..\..\.vsconfig" />
+    <Filter Include="Config">
+      <UniqueIdentifier>{FA535FFB-25E1-3D20-B416-52F9BE21E06E}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Config\DefaultEditor.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultEngine.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultGame.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultInput.ini">
+      <Filter>Config</Filter>
+    </None>
+    <Filter Include="Source\SuperFinalCoolProj">
+      <UniqueIdentifier>{D363E656-2FA2-3854-84F0-DC0EF860CB2F}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Source\SuperFinalCoolProj\SuperFinalCoolProj.Build.cs">
+      <Filter>Source\SuperFinalCoolProj</Filter>
+    </None>
+    <ClCompile Include="..\..\Source\SuperFinalCoolProj\SuperFinalCoolProj.cpp">
+      <Filter>Source\SuperFinalCoolProj</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\SuperFinalCoolProj\SuperFinalCoolProj.h">
+      <Filter>Source\SuperFinalCoolProj</Filter>
+    </ClInclude>
+    <Filter Include="Source\SuperFinalCoolProj\Private">
+      <UniqueIdentifier>{2D7D2A1D-9985-3B63-856C-FE14E22C7685}</UniqueIdentifier>
+    </Filter>
+    <ClCompile Include="..\..\Source\SuperFinalCoolProj\Private\FirstClass.cpp">
+      <Filter>Source\SuperFinalCoolProj\Private</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\SuperFinalCoolProj\Private\FirstClass.h">
+      <Filter>Source\SuperFinalCoolProj\Private</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\SuperFinalCoolProj\Private\MyFirstActor.cpp">
+      <Filter>Source\SuperFinalCoolProj\Private</Filter>
+    </ClCompile>
+    <Filter Include="Source\SuperFinalCoolProj\Public">
+      <UniqueIdentifier>{FFEA001C-2E86-37F1-9F9E-DC9BDF095576}</UniqueIdentifier>
+    </Filter>
+    <ClInclude Include="..\..\Source\SuperFinalCoolProj\Public\MyFirstActor.h">
+      <Filter>Source\SuperFinalCoolProj\Public</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

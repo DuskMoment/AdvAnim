@@ -1,0 +1,14 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "c:\\users\\william.mansfield\\desktop\\advanim\\superfinalcoolproj\\source\\superfinalcoolproj\\superfinalcoolproj.cpp",
+        "ProvidedModule": "",
+        "PCH": "c:\\users\\william.mansfield\\desktop\\advanim\\superfinalcoolproj\\intermediate\\build\\win64\\x64\\superfinalcoolprojeditor\\development\\unrealed\\sharedpch.unrealed.project.valapi.valexpapi.cpp20.h.pch",
+        "Includes": [
+            "c:\\users\\william.mansfield\\desktop\\advanim\\superfinalcoolproj\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\superfinalcoolproj\\definitions.superfinalcoolproj.h",
+            "c:\\users\\william.mansfield\\desktop\\advanim\\superfinalcoolproj\\source\\superfinalcoolproj\\superfinalcoolproj.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}

@@ -1,0 +1,14 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UnrealEditor-SuperFinalCoolProj.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"C:/Users/william.mansfield/Desktop/AdvAnim/SuperFinalCoolProj/Intermediate/Build/Win64/x64/SuperFinalCoolProjEditor/Development/UnrealEd/SharedPCH.UnrealEd.Project.ValApi.ValExpApi.Cpp20.h.obj"
+"C:/Users/william.mansfield/Desktop/AdvAnim/SuperFinalCoolProj/Intermediate/Build/Win64/x64/UnrealEditor/Development/SuperFinalCoolProj/SuperFinalCoolProj.cpp.obj"
+"C:/Users/william.mansfield/Desktop/AdvAnim/SuperFinalCoolProj/Intermediate/Build/Win64/x64/UnrealEditor/Development/SuperFinalCoolProj/FirstClass.cpp.obj"
+"C:/Users/william.mansfield/Desktop/AdvAnim/SuperFinalCoolProj/Intermediate/Build/Win64/x64/UnrealEditor/Development/SuperFinalCoolProj/PerModuleInline.gen.cpp.obj"
+"C:/Users/william.mansfield/Desktop/AdvAnim/SuperFinalCoolProj/Intermediate/Build/Win64/x64/UnrealEditor/Development/SuperFinalCoolProj/Default.rc2.res"
+/OUT:"C:/Users/william.mansfield/Desktop/AdvAnim/SuperFinalCoolProj/Intermediate/Build/Win64/x64/UnrealEditor/Development/SuperFinalCoolProj/UnrealEditor-SuperFinalCoolProj.lib"
