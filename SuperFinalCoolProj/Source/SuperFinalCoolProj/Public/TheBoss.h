@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BoneDataNode.h"
 #include "GameFramework/Actor.h"
 #include "TheBoss.generated.h"
 
@@ -23,4 +24,13 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	//UPROPERTY(VisableAnywhere);
+	
+
+	TArray<FName> names;
+	TArray<BoneDataNode> data;
+
+
+	UPROPERTY(EditAnywhere)
+	USkeletalMeshComponent* mesh;
 };
