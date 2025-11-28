@@ -55,7 +55,7 @@ void ATheBoss::BeginPlay()
 	if (pH->GetBoneCount() != 0)
 	{
 		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Heirarchy Populated %i"), pH->GetBoneCount()));
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Heirarchy Populated %s"), *data[0].GetBoneName().ToString()));
 	}
 	
 }

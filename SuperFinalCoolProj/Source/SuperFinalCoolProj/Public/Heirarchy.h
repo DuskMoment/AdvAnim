@@ -14,6 +14,7 @@ class SUPERFINALCOOLPROJ_API Heirarchy
 private:
 	BoneDataNode* pBones;
 	BoneDataNode* pBasePose;
+	BoneDataNode* root;
 
 	size_t boneCount;
 

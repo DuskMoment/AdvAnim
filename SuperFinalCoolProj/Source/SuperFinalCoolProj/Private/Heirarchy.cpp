@@ -13,6 +13,8 @@ Heirarchy::Heirarchy(TArray<BoneDataNode>*  arrayToCopy)
 	pBones = arrayToCopy->GetData();
 	boneCount = arrayToCopy->Num();
 
+	root = pBones;
+
 	CaptureBasePose();
 }
 
