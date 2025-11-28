@@ -13,15 +13,20 @@ class SUPERFINALCOOLPROJ_API Heirarchy
 {
 private:
 	BoneDataNode* pBones;
+	BoneDataNode* pBasePose;
+
 	size_t boneCount;
+
 public:
 	Heirarchy();
 	Heirarchy(TArray<BoneDataNode>* arrayToCopy);
 	Heirarchy(size_t boneCount);
 
+	void CaptureBasePose();
 
 	size_t GetBoneCount();
 	~Heirarchy();
 
+	const BoneDataNode* GetBoneBasePose();
 	BoneDataNode* FindBoneByName(FName name);
 };

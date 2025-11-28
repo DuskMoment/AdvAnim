@@ -12,6 +12,8 @@ Heirarchy::Heirarchy(TArray<BoneDataNode>*  arrayToCopy)
 {
 	pBones = arrayToCopy->GetData();
 	boneCount = arrayToCopy->Num();
+
+	CaptureBasePose();
 }
 
 Heirarchy::Heirarchy(size_t boneCount)
@@ -19,8 +21,29 @@ Heirarchy::Heirarchy(size_t boneCount)
 	this->boneCount = boneCount;
 }
 
+void Heirarchy::CaptureBasePose()
+{
+	//capture the current position and make a copy then call it the base pose
+	TArray<BoneDataNode> copy;
+
+	for (int i = 0; i < boneCount; i++)
+	{
+		//make a copy
+		copy.Add(*(pBones + i));
+	}
+
+	pBasePose = copy.GetData();
+}
+
 Heirarchy::~Heirarchy()
 {
+	delete pBones;
+	delete pBasePose;
+}
+
+const BoneDataNode* Heirarchy::GetBoneBasePose()
+{
+	return pBasePose;
 }
 
 BoneDataNode* Heirarchy::FindBoneByName(FName name)
