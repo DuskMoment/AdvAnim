@@ -12,10 +12,20 @@ class SUPERFINALCOOLPROJ_API BoneDataNode
 public:
 	BoneDataNode();
 	BoneDataNode(FTransform trans, FVector location, FQuat rotation, FVector scale);
+
+
 	FTransform GetTransform();
 	FVector GetLocation();
 	FQuat GetRotation();
 	FVector GetScale();
+
+	void SetTransform(FTransform inputTransform);
+	void SetLocation(FVector inputLocation);
+	void SetRotation(FQuat inputRotation);
+	void SetScale(FVector intputScale);
+
+
+
 	~BoneDataNode();
 
 	void SetBoneName(FName name);

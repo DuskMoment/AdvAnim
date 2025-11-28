@@ -9,9 +9,11 @@ ATheBoss::ATheBoss() : AActor()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("mesh"));
+	mesh = CreateDefaultSubobject<UPoseableMeshComponent>(TEXT("mesh"));
 	
 	SetRootComponent(mesh);
+
+	mesh->SetSkeletalMesh(skelMesh, true);
 
 }
 
@@ -26,15 +28,15 @@ void ATheBoss::BeginPlay()
 	}
 
 	mesh->GetBoneNames(names);
+	mesh->bDisplayBones = true;
 
-
-	
+	size_t boneCount = mesh->GetNumBones();
 	for (int i = 0; i < names.Num(); i++)
 	{
-		//get all of the data and place it into a struct
+		//get all of the data and plasice it into a struct
 		FTransform trans = mesh->GetBoneTransform(names[i], RTS_Component);
-		FVector loc = mesh->GetBoneLocation(names[i]);
-		FQuat quat = mesh->GetBoneQuaternion(names[i]);
+		FVector loc = mesh->GetBoneLocation(names[i], EBoneSpaces::ComponentSpace);
+		FQuat quat = mesh->GetBoneQuaternion(names[i], EBoneSpaces::ComponentSpace);
 		FVector scale = trans.GetScale3D();
 
 		BoneDataNode node(trans, loc, quat, scale);
@@ -45,8 +47,17 @@ void ATheBoss::BeginPlay()
 		data.Add(node);
 
 		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Bone Data loaded %s"), *node.GetBoneName().ToString()));
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Bone Data loaded %s %f"), *node.GetBoneName().ToString(), (float)node.GetLocation().X));
 	}
+
+	pH = new Heirarchy(&data);
+
+	if (pH->GetBoneCount() != 0)
+	{
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Heirarchy Populated %i"), pH->GetBoneCount()));
+	}
+	
 }
 
 // Called every frame
@@ -54,5 +65,18 @@ void ATheBoss::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	//RightUpLeg
+	BoneDataNode* node = pH->FindBoneByName("RightUpLeg");
+
+	mesh->SetBoneLocationByName("RightUpLeg", node->GetLocation() + (FVector::UpVector * 10), EBoneSpaces::ComponentSpace);
+
+	node->SetLocation(node->GetLocation() + (FVector::UpVector * 10));
+}
+
+void ATheBoss::ApplyChangeToMesh(FName boneName)
+{
+	BoneDataNode* node = pH->FindBoneByName(boneName);
+
+	//applay changes
 }
 

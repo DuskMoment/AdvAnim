@@ -3,7 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/PoseableMeshComponent.h"
 #include "BoneDataNode.h"
+#include "Heirarchy.h"
 #include "GameFramework/Actor.h"
 #include "TheBoss.generated.h"
 
@@ -30,7 +32,14 @@ public:
 	TArray<FName> names;
 	TArray<BoneDataNode> data;
 
+	Heirarchy* pH;
 
 	UPROPERTY(EditAnywhere)
-	USkeletalMeshComponent* mesh;
+	UPoseableMeshComponent* mesh;
+
+	UPROPERTY(EditAnywhere)
+	USkeletalMesh* skelMesh;
+
+private:
+	void ApplyChangeToMesh(FName boneName);
 };

@@ -40,6 +40,26 @@ FVector BoneDataNode::GetScale()
 	return FVector();
 }
 
+void BoneDataNode::SetTransform(FTransform inputTransform)
+{
+	this->trans = inputTransform;
+}
+
+void BoneDataNode::SetLocation(FVector inputLocation)
+{
+	this->location = inputLocation;
+}
+
+void BoneDataNode::SetRotation(FQuat inputRotation)
+{
+	this->rotation = inputRotation;
+}
+
+void BoneDataNode::SetScale(FVector intputScale)
+{
+	this->scale = intputScale;
+}
+
 void BoneDataNode::SetBoneName(FName name)
 {
 	this->boneName = name;
