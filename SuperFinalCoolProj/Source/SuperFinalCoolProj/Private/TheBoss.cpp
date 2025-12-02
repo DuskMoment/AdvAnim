@@ -15,6 +15,10 @@ ATheBoss::ATheBoss() : AActor()
 
 	mesh->SetSkeletalMesh(skelMesh, true);
 
+	controller = new ClipController();
+
+	controller->currClip = animClip;
+
 }
 
 // Called when the game starts or when spawned
@@ -63,6 +67,8 @@ void ATheBoss::BeginPlay()
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Heirarchy Populated %s"), *data[0].GetBoneName().ToString()));
 	}
 	
+
+	controller->GetAssetData()
 }
 
 // Called every frame

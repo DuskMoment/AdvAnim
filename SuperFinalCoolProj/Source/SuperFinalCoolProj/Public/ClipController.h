@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BoneDataNode.h"
+#include "Components/PoseableMeshComponent.h"
 
 /**
  * 
@@ -14,6 +16,8 @@ public:
 	~ClipController();
 
 	void UpdateClipController(float dt);
+
+	BoneDataNode* GetAssetData(UPoseableMeshComponent& mesh);
 
 	UAnimSequence* currClip;
 	float currClipTime;

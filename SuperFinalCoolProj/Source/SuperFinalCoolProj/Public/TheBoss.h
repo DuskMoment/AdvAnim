@@ -8,6 +8,7 @@
 #include "Heirarchy.h"
 #include "GameFramework/Actor.h"
 #include "TheBoss.generated.h"
+#include "ClipController.h"
 
 UCLASS()
 class SUPERFINALCOOLPROJ_API ATheBoss : public AActor
@@ -42,6 +43,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	UAnimSequence* animClip;
+
+	ClipController* controller;
+
 
 private:
 	void ApplyChangeToMesh(FName boneName);
