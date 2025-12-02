@@ -27,8 +27,34 @@ void ClipController::UpdateClipController(float dt)
 
 BoneDataNode* ClipController::GetAssetData(UPoseableMeshComponent* mesh, USkeletalMeshComponent* skelMeshComp)
 {
-	
 	FMemMark Mark(FMemStack::Get());
+	//get the track data
+
+	TArray<FName> nameArray;
+
+	IAnimationDataModel* model = currClip->GetDataModel();
+	model->GetBoneTrackNames(nameArray);
+
+	FName* names = nameArray.GetData();
+	int test = model->GetBoneTrackIndexByName(names[1]);
+
+	TArray<FAnimNotifyTrack> track = currClip->AnimNotifyTracks;
+	FAnimNotifyTrack* dat = track.GetData();
+
+	//FVector3f* positions = boneAnimation.InternalTrackData.PosKeys.GetData();
+
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("clip name %s"), *names->ToString()));
+
+
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("KeyNames %i"), model->GetNumberOfKeys()));
+
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("bone track index %i %s"), test, *names[1].ToString()));
+
+
+	
 	FCompactPose outPose;
 	FBlendedCurve outCurve;
 	FStackCustomAttributes OutAttr;
@@ -70,11 +96,11 @@ BoneDataNode* ClipController::GetAssetData(UPoseableMeshComponent* mesh, USkelet
 	const FTransform* boneData = boneTrans.GetData();
 
 
-	for (int i = 0; i < boneTrans.Num(); i++)
+	/*for (int i = 0; i < boneTrans.Num(); i++)
 	{
 		if (GEngine)
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Bone Data loaded %f"), boneData[i].GetLocation().X));
-	}
+	}*/
 
 	return new BoneDataNode();
 }
