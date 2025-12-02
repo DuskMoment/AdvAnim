@@ -40,6 +40,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	USkeletalMesh* skelMesh;
 
+	UPROPERTY(EditAnywhere)
+	UAnimSequence* animClip;
+
 private:
 	void ApplyChangeToMesh(FName boneName);
 };

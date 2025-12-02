@@ -43,11 +43,16 @@ void ATheBoss::BeginPlay()
 		node.SetBoneName(names[i]);
 
 		node.SetParentName(mesh->GetParentBone(node.GetBoneName()));
-
 		data.Add(node);
 
 		if (GEngine)
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Bone Data loaded %s %f"), *node.GetBoneName().ToString(), (float)node.GetLocation().X));
+	
+		/*FAnimationPoseData* t;
+		animClip->GetPlayLength();
+		animClip->GetAnimationPose(*t, FAnimExtractContext());*/
+
+
 	}
 
 	pH = new Heirarchy(&data);
