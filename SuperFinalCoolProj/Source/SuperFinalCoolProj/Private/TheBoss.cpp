@@ -10,10 +10,14 @@ ATheBoss::ATheBoss() : AActor()
 	PrimaryActorTick.bCanEverTick = true;
 
 	mesh = CreateDefaultSubobject<UPoseableMeshComponent>(TEXT("mesh"));
+	skelMeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("skelMeshComp"));
 	
 	SetRootComponent(mesh);
 
 	mesh->SetSkeletalMesh(skelMesh, true);
+	skelMeshComp->SetSkeletalMesh(skelMesh, true);
+
+	mesh->CopyPoseFromSkeletalComponent(skelMeshComp);
 
 	controller = new ClipController();
 
@@ -68,7 +72,7 @@ void ATheBoss::BeginPlay()
 	}
 	
 
-	controller->GetAssetData()
+	controller->GetAssetData(mesh, skelMeshComp);
 }
 
 // Called every frame
@@ -78,7 +82,6 @@ void ATheBoss::Tick(float DeltaTime)
 
 	//RightUpLeg
 	BoneDataNode* node = pH->FindBoneByName("RightUpLeg");
-
 	mesh->SetBoneLocationByName("RightUpLeg", node->GetLocation() + (FVector::UpVector * 10), EBoneSpaces::ComponentSpace);
 
 	node->SetLocation(node->GetLocation() + (FVector::UpVector * 10));

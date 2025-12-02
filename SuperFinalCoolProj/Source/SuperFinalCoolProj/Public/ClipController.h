@@ -17,7 +17,7 @@ public:
 
 	void UpdateClipController(float dt);
 
-	BoneDataNode* GetAssetData(UPoseableMeshComponent& mesh);
+	BoneDataNode* GetAssetData(UPoseableMeshComponent* mesh, USkeletalMeshComponent* skelMeshComp);
 
 	UAnimSequence* currClip;
 	float currClipTime;

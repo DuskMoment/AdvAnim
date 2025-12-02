@@ -25,7 +25,7 @@ void ClipController::UpdateClipController(float dt)
 
 }
 
-BoneDataNode* ClipController::GetAssetData(UPoseableMeshComponent& mesh)
+BoneDataNode* ClipController::GetAssetData(UPoseableMeshComponent* mesh, USkeletalMeshComponent* skelMeshComp)
 {
 	
 
@@ -38,15 +38,26 @@ BoneDataNode* ClipController::GetAssetData(UPoseableMeshComponent& mesh)
 	//ENGINE_API FBoneContainer(const TArrayView<const FBoneIndexType>&InRequiredBoneIndexArray, const UE::Anim::FCurveFilterSettings & InCurveFilterSettings, UObject & InAsset);
 
 
-	USkeletalMesh* skel = mesh.GetSkeletalMesh_DEPRECATED();
-	skel->GetRefSkeleton().GetBoneContainer();
+	//USkeletalMesh* skel = mesh.GetSkeletalMesh_DEPRECATED();
+	//skel->GetRefSkeleton().GetBoneContainer();
 
-	FReferenceSkeleton refSkel = skel->GetRefSkeleton();
-
-	refSkel.
-
+	//FReferenceSkeleton refSkel = skel->GetRefSkeleton();
 	
-	outPose.SetBoneContainer(pvb);
+	if (!skelMeshComp)
+	{
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Skel Mesh Comp does not exist")));
+		return nullptr;
+	}
+
+	if (!skelMeshComp->GetAnimInstance())
+	{
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Skel Mesh Comp AnimInstance does not exist")));
+		return nullptr;
+	}
+
+	outPose.SetBoneContainer(&skelMeshComp->GetAnimInstance()->GetRequiredBones());
 
 	FAnimationPoseData poseData(outPose, outCurve, OutAttr);
 

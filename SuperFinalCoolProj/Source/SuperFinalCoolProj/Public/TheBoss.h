@@ -2,13 +2,13 @@
 
 #pragma once
 
+#include "ClipController.h"
 #include "CoreMinimal.h"
 #include "Components/PoseableMeshComponent.h"
 #include "BoneDataNode.h"
 #include "Heirarchy.h"
 #include "GameFramework/Actor.h"
 #include "TheBoss.generated.h"
-#include "ClipController.h"
 
 UCLASS()
 class SUPERFINALCOOLPROJ_API ATheBoss : public AActor
@@ -37,6 +37,7 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	UPoseableMeshComponent* mesh;
+	USkeletalMeshComponent* skelMeshComp;
 
 	UPROPERTY(EditAnywhere)
 	USkeletalMesh* skelMesh;
