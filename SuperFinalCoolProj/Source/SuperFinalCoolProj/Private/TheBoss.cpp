@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
+#include "AnimationCont.h"
 #include "TheBoss.h"
 
 // Sets default values
@@ -14,14 +14,34 @@ ATheBoss::ATheBoss() : AActor()
 	
 	SetRootComponent(mesh);
 
+	if (skelMesh == NULL)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Black, FString::Printf(TEXT("skell mesh was null")));
+	}
+
 	mesh->SetSkeletalMesh(skelMesh, true);
 	skelMeshComp->SetSkeletalMesh(skelMesh, true);
 
 	mesh->CopyPoseFromSkeletalComponent(skelMeshComp);
 
+
 	controller = new ClipController();
 
 	controller->currClip = animClip;
+
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Black, FString::Printf(TEXT("Atempting to init")));
+
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBPClassFinder(TEXT("/Game/AnimBluePrint"));
+	skelMeshComp->SetAnimInstanceClass(AnimBPClassFinder.Class);
+	skelMeshComp->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+
+	
+	if (AnimBPClassFinder.Succeeded())
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString::Printf(TEXT("FOUND THE BP")));
+	}
+	
+	//skelMeshComp->SetAnimation(animClip);
 
 }
 
@@ -33,6 +53,16 @@ void ATheBoss::BeginPlay()
 	if (mesh == NULL)
 	{
 		return;
+	}
+
+	
+	if (!skelMeshComp->HasValidAnimationInstance())
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString::Printf(TEXT("NO INSTANCE")));
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString::Printf(TEXT("HAS INSTANCE")));
 	}
 
 	mesh->GetBoneNames(names);
@@ -53,8 +83,8 @@ void ATheBoss::BeginPlay()
 		node.SetParentName(mesh->GetParentBone(node.GetBoneName()));
 		data.Add(node);
 
-		if (GEngine)
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Bone Data loaded %s %f"), *node.GetBoneName().ToString(), (float)node.GetLocation().X));
+		/*if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Bone Data loaded %s %f"), *node.GetBoneName().ToString(), (float)node.GetLocation().X));*/
 	
 		/*FAnimationPoseData* t;
 		animClip->GetPlayLength();
@@ -72,7 +102,7 @@ void ATheBoss::BeginPlay()
 	}
 	
 
-	controller->GetAssetData(mesh, skelMeshComp);
+	//controller->GetAssetData(mesh, skelMeshComp);
 }
 
 // Called every frame

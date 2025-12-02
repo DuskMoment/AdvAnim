@@ -23,6 +23,7 @@ Heirarchy::Heirarchy(size_t boneCount)
 	this->boneCount = boneCount;
 }
 
+//cause mem leak PLEASE FIX
 void Heirarchy::CaptureBasePose()
 {
 	//capture the current position and make a copy then call it the base pose
