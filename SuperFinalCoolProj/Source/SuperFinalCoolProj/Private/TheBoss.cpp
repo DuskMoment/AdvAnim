@@ -103,7 +103,7 @@ void ATheBoss::BeginPlay()
 	}
 	
 
-	//controller->GetAssetData(mesh, skelMeshComp);
+	controller->GetAssetData(mesh, skelMeshComp);
 }
 
 // Called every frame

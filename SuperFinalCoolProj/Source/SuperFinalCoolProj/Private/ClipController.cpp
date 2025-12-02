@@ -28,7 +28,7 @@ void ClipController::UpdateClipController(float dt)
 BoneDataNode* ClipController::GetAssetData(UPoseableMeshComponent* mesh, USkeletalMeshComponent* skelMeshComp)
 {
 	
-
+	FMemMark Mark(FMemStack::Get());
 	FCompactPose outPose;
 	FBlendedCurve outCurve;
 	FStackCustomAttributes OutAttr;
@@ -57,6 +57,7 @@ BoneDataNode* ClipController::GetAssetData(UPoseableMeshComponent* mesh, USkelet
 		return nullptr;
 	}
 
+	auto cont = skelMeshComp->GetAnimInstance()->GetRequiredBones();
 	outPose.SetBoneContainer(&skelMeshComp->GetAnimInstance()->GetRequiredBones());
 
 	FAnimationPoseData poseData(outPose, outCurve, OutAttr);
