@@ -44,9 +44,12 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	UAnimSequence* animClip;
-	UAnimationCont* animation;
+	//UAnimationCont* animation;
 
 	ClipController* controller;
+
+	UPROPERTY(EditAnywhere)
+	UClass* animInst;
 
 
 private:

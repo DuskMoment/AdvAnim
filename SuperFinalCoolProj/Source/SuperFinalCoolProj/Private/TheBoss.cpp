@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "AnimationCont.h"
 #include "TheBoss.h"
+#include "AnimationCont.h"
 
 // Sets default values
 ATheBoss::ATheBoss() : AActor()
@@ -13,6 +13,20 @@ ATheBoss::ATheBoss() : AActor()
 	skelMeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("skelMeshComp"));
 	
 	SetRootComponent(mesh);
+
+	//skelMeshComp->SetAnimation(animClip);
+
+}
+
+// Called when the game starts or when spawned
+void ATheBoss::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (mesh == NULL)
+	{
+		return;
+	}
 
 	if (skelMesh == NULL)
 	{
@@ -33,31 +47,15 @@ ATheBoss::ATheBoss() : AActor()
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Black, FString::Printf(TEXT("Atempting to init")));
 
-	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBPClassFinder(TEXT("/Game/AnimBluePrint"));
-	skelMeshComp->SetAnimInstanceClass(AnimBPClassFinder.Class);
+	skelMeshComp->SetAnimInstanceClass(animInst);
 	skelMeshComp->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 
-	
-	if (AnimBPClassFinder.Succeeded())
+
+	if (animInst)
 	{
 		if (GEngine)
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString::Printf(TEXT("FOUND THE BP")));
 	}
-	
-	//skelMeshComp->SetAnimation(animClip);
-
-}
-
-// Called when the game starts or when spawned
-void ATheBoss::BeginPlay()
-{
-	Super::BeginPlay();
-
-	if (mesh == NULL)
-	{
-		return;
-	}
-
 	
 	if (!skelMeshComp->HasValidAnimationInstance())
 	{
