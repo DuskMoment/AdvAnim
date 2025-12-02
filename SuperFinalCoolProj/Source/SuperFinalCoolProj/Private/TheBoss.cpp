@@ -16,7 +16,8 @@ ATheBoss::ATheBoss() : AActor()
 
 	if (skelMesh == NULL)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Black, FString::Printf(TEXT("skell mesh was null")));
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Black, FString::Printf(TEXT("skell mesh was null")));
 	}
 
 	mesh->SetSkeletalMesh(skelMesh, true);
@@ -29,7 +30,8 @@ ATheBoss::ATheBoss() : AActor()
 
 	controller->currClip = animClip;
 
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Black, FString::Printf(TEXT("Atempting to init")));
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Black, FString::Printf(TEXT("Atempting to init")));
 
 	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBPClassFinder(TEXT("/Game/AnimBluePrint"));
 	skelMeshComp->SetAnimInstanceClass(AnimBPClassFinder.Class);
@@ -38,7 +40,8 @@ ATheBoss::ATheBoss() : AActor()
 	
 	if (AnimBPClassFinder.Succeeded())
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString::Printf(TEXT("FOUND THE BP")));
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString::Printf(TEXT("FOUND THE BP")));
 	}
 	
 	//skelMeshComp->SetAnimation(animClip);
