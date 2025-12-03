@@ -3,6 +3,7 @@
 
 #include "ClipController.h"
 #include "EditorFramework/AssetImportData.h"
+#include "ForwardKinematics.h"
 
 
 ClipController::ClipController()
@@ -107,16 +108,18 @@ BoneDataNode* ClipController::GetAssetData(UPoseableMeshComponent* mesh, USkelet
 			const FName BoneName = currClip->GetSkeleton()->GetReferenceSkeleton().GetBoneName(BoneIndex.GetInt());
 			//mesh->SetBoneLocationByName(BoneName, BoneTransform.GetLocation() + BaseBoneTransform.GetLocation(), EBoneSpaces::ComponentSpace);
 			//mesh->SetBoneRotationByName(BoneName, (BoneTransform.GetRotation() + BaseBoneTransform.GetRotation()).Rotator(), EBoneSpaces::ComponentSpace);
-			mesh->SetBoneTransformByName(BoneName, BoneTransform, EBoneSpaces::ComponentSpace);
+			//mesh->SetBoneTransformByName(BoneName, BoneTransform, EBoneSpaces::ComponentSpace);
 			
 			/*if (GEngine)
 				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Bone: %s, Transform: %s"), *BoneName.ToString(), *BoneTransform.ToString()));*/
 		}
 	}
 
-	const TArray<FTransform>& boneTrans = reinterpret_cast<const TArray<FTransform>&>(outPose.GetBones());
+	ForwardKinematics::SolvePartialFK(mesh, OutPose);
 
-	const FTransform* boneData = boneTrans.GetData();
+	/*const TArray<FTransform>& boneTrans = reinterpret_cast<const TArray<FTransform>&>(outPose.GetBones());
+
+	const FTransform* boneData = boneTrans.GetData();*/
 
 
 	/*for (int i = 0; i < boneTrans.Num(); i++)
