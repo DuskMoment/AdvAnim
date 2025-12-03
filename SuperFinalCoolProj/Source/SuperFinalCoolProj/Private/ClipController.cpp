@@ -32,11 +32,24 @@ BoneDataNode* ClipController::GetAssetData(UPoseableMeshComponent* mesh, USkelet
 
 	TArray<FName> nameArray;
 
-	IAnimationDataModel* model = currClip->GetDataModel();
+	IAnimationDataController& ctrl = currClip->GetController();
+	const IAnimationDataModel* model = ctrl.GetModel();
 	model->GetBoneTrackNames(nameArray);
-
 	FName* names = nameArray.GetData();
-	int test = model->GetBoneTrackIndexByName(names[1]);
+	TArray<FBoneAnimationTrack> tracks = model->GetBoneAnimationTracks();
+	int test = model->GetBoneTrackIndexByName(names[0]);
+
+	/*for (int i = 0; i < tracks.Num(); i++)
+	{
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Track Names: %s"), *tracks[i].Name.ToString()));
+	}*/
+
+	if (GEngine)
+		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Track NamesSES: %s"), currClip->GetSkeleton()->GetReferenceSkeleton().FindBoneIndex()));
+
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Num Ref Bones %i"), currClip->GetSkeleton()->GetReferenceSkeleton().GetNum()));
 
 	TArray<FAnimNotifyTrack> track = currClip->AnimNotifyTracks;
 	FAnimNotifyTrack* dat = track.GetData();
@@ -58,16 +71,6 @@ BoneDataNode* ClipController::GetAssetData(UPoseableMeshComponent* mesh, USkelet
 	FCompactPose outPose;
 	FBlendedCurve outCurve;
 	FStackCustomAttributes OutAttr;
-
-	//UPoseableMeshComponent testComp;
-
-	//ENGINE_API FBoneContainer(const TArrayView<const FBoneIndexType>&InRequiredBoneIndexArray, const UE::Anim::FCurveFilterSettings & InCurveFilterSettings, UObject & InAsset);
-
-
-	//USkeletalMesh* skel = mesh.GetSkeletalMesh_DEPRECATED();
-	//skel->GetRefSkeleton().GetBoneContainer();
-
-	//FReferenceSkeleton refSkel = skel->GetRefSkeleton();
 	
 	if (!skelMeshComp)
 	{
@@ -83,13 +86,33 @@ BoneDataNode* ClipController::GetAssetData(UPoseableMeshComponent* mesh, USkelet
 		return nullptr;
 	}
 
-	auto cont = skelMeshComp->GetAnimInstance()->GetRequiredBones();
+	//Get bone container for required bones to get animation poses for
 	outPose.SetBoneContainer(&skelMeshComp->GetAnimInstance()->GetRequiredBones());
+
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Num Required Bones %i"), skelMeshComp->GetAnimInstance()->GetRequiredBones().GetNumBones()));
 
 	FAnimationPoseData poseData(outPose, outCurve, OutAttr);
 
+	//Gets animation poses
 	currClip->GetAnimationPose(poseData, FAnimExtractContext(currClipTime));
 
+	//Updates poseable mesh bones with animation poses
+	FCompactPose OutPose = poseData.GetPose();
+	for (FCompactPoseBoneIndex BoneIndex : OutPose.ForEachBoneIndex())
+	{
+		if (BoneIndex.GetInt() < currClip->GetSkeleton()->GetReferenceSkeleton().GetNum()) {
+			const FTransform& BoneTransform = OutPose[BoneIndex];
+			const FTransform& BaseBoneTransform = currClip->GetSkeleton()->GetReferenceSkeleton().GetBoneAbsoluteTransform(BoneIndex.GetInt());
+			const FName BoneName = currClip->GetSkeleton()->GetReferenceSkeleton().GetBoneName(BoneIndex.GetInt());
+			//mesh->SetBoneLocationByName(BoneName, BoneTransform.GetLocation() + BaseBoneTransform.GetLocation(), EBoneSpaces::ComponentSpace);
+			//mesh->SetBoneRotationByName(BoneName, (BoneTransform.GetRotation() + BaseBoneTransform.GetRotation()).Rotator(), EBoneSpaces::ComponentSpace);
+			mesh->SetBoneTransformByName(BoneName, BoneTransform, EBoneSpaces::ComponentSpace);
+			
+			/*if (GEngine)
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Bone: %s, Transform: %s"), *BoneName.ToString(), *BoneTransform.ToString()));*/
+		}
+	}
 
 	const TArray<FTransform>& boneTrans = reinterpret_cast<const TArray<FTransform>&>(outPose.GetBones());
 

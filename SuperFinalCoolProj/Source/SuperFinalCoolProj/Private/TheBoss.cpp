@@ -111,11 +111,14 @@ void ATheBoss::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	controller->UpdateClipController(DeltaTime);
+
 	//RightUpLeg
 	BoneDataNode* node = pH->FindBoneByName("RightUpLeg");
 	mesh->SetBoneLocationByName("RightUpLeg", node->GetLocation() + (FVector::UpVector * 10), EBoneSpaces::ComponentSpace);
 
 	node->SetLocation(node->GetLocation() + (FVector::UpVector * 10));
+	controller->GetAssetData(mesh, skelMeshComp);
 }
 
 void ATheBoss::ApplyChangeToMesh(FName boneName)
