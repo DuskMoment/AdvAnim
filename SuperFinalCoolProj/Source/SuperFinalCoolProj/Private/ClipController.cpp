@@ -3,6 +3,7 @@
 
 #include "ClipController.h"
 #include "EditorFramework/AssetImportData.h"
+#include "ForwardKinematics.h"
 
 
 ClipController::ClipController()
@@ -312,8 +313,28 @@ BoneDataNode* ClipController::GetAssetData(UPoseableMeshComponent* mesh, USkelet
 
 	return NULL;
 
+	//Updates poseable mesh bones with animation poses
+	FCompactPose OutPose = poseData.GetPose();
+	for (FCompactPoseBoneIndex BoneIndex : OutPose.ForEachBoneIndex())
+	{
+		if (BoneIndex.GetInt() < currClip->GetSkeleton()->GetReferenceSkeleton().GetNum()) {
+			const FTransform& BoneTransform = OutPose[BoneIndex];
+			const FTransform& BaseBoneTransform = currClip->GetSkeleton()->GetReferenceSkeleton().GetBoneAbsoluteTransform(BoneIndex.GetInt());
+			const FName BoneName = currClip->GetSkeleton()->GetReferenceSkeleton().GetBoneName(BoneIndex.GetInt());
+			//mesh->SetBoneLocationByName(BoneName, BoneTransform.GetLocation() + BaseBoneTransform.GetLocation(), EBoneSpaces::ComponentSpace);
+			//mesh->SetBoneRotationByName(BoneName, (BoneTransform.GetRotation() + BaseBoneTransform.GetRotation()).Rotator(), EBoneSpaces::ComponentSpace);
+			//mesh->SetBoneTransformByName(BoneName, BoneTransform, EBoneSpaces::ComponentSpace);
+			
+			/*if (GEngine)
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Bone: %s, Transform: %s"), *BoneName.ToString(), *BoneTransform.ToString()));*/
+		}
+	}
 
+	ForwardKinematics::UpdateFK(mesh, OutPose);
 
+	/*const TArray<FTransform>& boneTrans = reinterpret_cast<const TArray<FTransform>&>(outPose.GetBones());
+
+	const FTransform* boneData = boneTrans.GetData();*/
 
 
 
