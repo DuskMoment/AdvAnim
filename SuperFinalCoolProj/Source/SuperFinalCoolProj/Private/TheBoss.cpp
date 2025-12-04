@@ -15,6 +15,8 @@ ATheBoss::ATheBoss() : AActor()
 	SetRootComponent(mesh);
 
 	//skelMeshComp->SetAnimation(animClip);
+	controller = new ClipController();
+	controller->GetAssetData(mesh, skelMeshComp);
 
 }
 
@@ -22,7 +24,7 @@ ATheBoss::ATheBoss() : AActor()
 void ATheBoss::BeginPlay()
 {
 	Super::BeginPlay();
-
+	controller->currClip = animClip;
 	if (mesh == NULL)
 	{
 		return;
@@ -40,10 +42,7 @@ void ATheBoss::BeginPlay()
 	mesh->CopyPoseFromSkeletalComponent(skelMeshComp);
 
 
-	controller = new ClipController();
-
-	controller->currClip = animClip;
-
+	
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Black, FString::Printf(TEXT("Atempting to init")));
 
@@ -56,7 +55,7 @@ void ATheBoss::BeginPlay()
 		if (GEngine)
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString::Printf(TEXT("FOUND THE BP")));
 	}
-	
+
 	if (!skelMeshComp->HasValidAnimationInstance())
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString::Printf(TEXT("NO INSTANCE")));
@@ -86,10 +85,10 @@ void ATheBoss::BeginPlay()
 
 		/*if (GEngine)
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Bone Data loaded %s %f"), *node.GetBoneName().ToString(), (float)node.GetLocation().X));*/
-	
-		/*FAnimationPoseData* t;
-		animClip->GetPlayLength();
-		animClip->GetAnimationPose(*t, FAnimExtractContext());*/
+
+			/*FAnimationPoseData* t;
+			animClip->GetPlayLength();
+			animClip->GetAnimationPose(*t, FAnimExtractContext());*/
 
 
 	}
@@ -101,10 +100,9 @@ void ATheBoss::BeginPlay()
 		if (GEngine)
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Heirarchy Populated %s"), *data[0].GetBoneName().ToString()));
 	}
-	
 
-	controller->GetAssetData(mesh, skelMeshComp);
 }
+	
 
 // Called every frame
 void ATheBoss::Tick(float DeltaTime)
@@ -118,7 +116,7 @@ void ATheBoss::Tick(float DeltaTime)
 	mesh->SetBoneLocationByName("RightUpLeg", node->GetLocation() + (FVector::UpVector * 10), EBoneSpaces::ComponentSpace);
 
 	node->SetLocation(node->GetLocation() + (FVector::UpVector * 10));
-	controller->GetAssetData(mesh, skelMeshComp);
+	//controller->GetAssetData(mesh, skelMeshComp);
 }
 
 void ATheBoss::ApplyChangeToMesh(FName boneName)
