@@ -115,7 +115,7 @@ BoneDataNode* ClipController::GetAssetData(UPoseableMeshComponent* mesh, USkelet
 		}
 	}
 
-	ForwardKinematics::SolvePartialFK(mesh, OutPose);
+	ForwardKinematics::UpdateFK(mesh, OutPose);
 
 	/*const TArray<FTransform>& boneTrans = reinterpret_cast<const TArray<FTransform>&>(outPose.GetBones());
 

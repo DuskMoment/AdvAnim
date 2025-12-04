@@ -3,13 +3,37 @@
 
 #include "ForwardKinematics.h"
 
-//ForwardKinematics::ForwardKinematics()
-//{
-//}
-//
-//ForwardKinematics::~ForwardKinematics()
-//{
-//}
+int ForwardKinematics::UpdateFK(UPoseableMeshComponent* mesh, FCompactPose& animPoses)
+{
+	////GetAnimationPose() does concat already
+	// 
+	//TArray<FName> names;
+	//mesh->GetBoneNames(names);
+
+	//for (int i = 0; i < names.Num(); i++)
+	//{
+	//	int baseBoneIndex = mesh->SkeletalMesh->RefSkeleton.FindBoneIndex(names[i]);
+
+	//	FTransform boneBaseLocalTransform = mesh->SkeletalMesh->RefSkeleton.GetRefBonePose()[baseBoneIndex];
+	//	
+	//	FCompactPoseBoneIndex animBoneIndex = FCompactPoseBoneIndex(mesh->GetBoneIndex(names[i]));
+	//	
+	//	FVector t(0.0f, 0.0f, 0.0f);
+
+	//	if (GEngine)
+	//		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Bone: %s, Transform: %s"), *names[i].ToString(), *boneBaseLocalTransform.GetTranslation().ToString()));
+	//	////Concat
+	//	animPoses[animBoneIndex].SetTranslation(animPoses[animBoneIndex].GetTranslation() + boneBaseLocalTransform.GetTranslation());
+	//	animPoses[animBoneIndex].SetRotation((animPoses[animBoneIndex].GetRotation() * boneBaseLocalTransform.GetRotation()));
+	//	animPoses[animBoneIndex].SetScale3D(animPoses[animBoneIndex].GetScale3D() * boneBaseLocalTransform.GetScale3D());
+	//	
+	//	//mesh->GetBoneSpaceTransforms();
+	//}
+
+	ForwardKinematics::SolvePartialFK(mesh, animPoses);
+
+	return 1;
+}
 
 int ForwardKinematics::SolvePartialFK(UPoseableMeshComponent* mesh, FCompactPose& animPoses)
 {
@@ -42,15 +66,16 @@ int ForwardKinematics::SolveRootFK(UPoseableMeshComponent* mesh, FCompactPose& a
 int ForwardKinematics::SolveSingleFK(UPoseableMeshComponent* mesh, FCompactPose& animPoses, FName name, FName parentName)
 {
 	FCompactPoseBoneIndex boneIndex = FCompactPoseBoneIndex(mesh->GetBoneIndex(name));
-	FTransform currentT = mesh->GetBoneTransformByName(name, EBoneSpaces::ComponentSpace);
+	int localBoneIndex = mesh->GetBoneIndex(name);
+
+	//FTransform currentT = mesh->GetBoneSpaceTransforms()[localBoneIndex];
+
 	FTransform parentT = mesh->GetBoneTransformByName(parentName, EBoneSpaces::ComponentSpace);
-	//mesh->SetBoneTransformByName(name, parentT * animPoses[boneIndex], EBoneSpaces::ComponentSpace);
+	FTransform newT((parentT.ToMatrixWithScale() * animPoses[boneIndex].ToMatrixWithScale()));
 
-	mesh->GetBoneSpaceTransforms();
+	mesh->SetBoneTransformByName(name, animPoses[boneIndex] * parentT, EBoneSpaces::ComponentSpace);
 
-	mesh->SetBoneRotationByName(name, (parentT.GetRotation() * animPoses[boneIndex].GetRotation()).Rotator(), EBoneSpaces::ComponentSpace);
-	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Bone: %s, Transform: %s"), *name.ToString(), *animPoses[boneIndex].GetLocation().ToString()));
-	mesh->SetBoneLocationByName(name, animPoses[boneIndex].GetLocation(), EBoneSpaces::ComponentSpace);
+	//mesh->SetBoneRotationByName(name, (parentT.GetRotation() * animPoses[boneIndex].GetRotation()).Rotator(), EBoneSpaces::ComponentSpace);
+	//mesh->SetBoneLocationByName(name, animPoses[boneIndex].GetLocation(), EBoneSpaces::ComponentSpace);
 	return 1;
 }
