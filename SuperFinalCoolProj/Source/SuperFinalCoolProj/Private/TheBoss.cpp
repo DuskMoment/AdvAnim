@@ -17,6 +17,7 @@ ATheBoss::ATheBoss() : AActor()
 	//skelMeshComp->SetAnimation(animClip);
 	controller = new ClipController();
 	controller->GetAssetData(mesh, skelMeshComp);
+	controller->InitAnimationController("basePose", 0.2);
 
 }
 

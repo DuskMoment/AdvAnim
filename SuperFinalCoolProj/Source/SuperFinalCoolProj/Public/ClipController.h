@@ -18,7 +18,9 @@ public:
 
 	void UpdateClipController(float dt);
 
+	void InitAnimationController(FString animationName, float timeBetween);
 	BoneDataNode* GetAssetData(UPoseableMeshComponent* mesh, USkeletalMeshComponent* skelMeshComp);
+
 
 	UAnimSequence* currClip;
 	float currClipTime;
@@ -31,6 +33,25 @@ public:
 		float scale;
 	};
 
+	struct AnimationKeyFrame
+	{
+		float duration;
+		float start;
+		float end;
+		float keyframeTime;
+		float deltaKeyframe;
+
+	};
+
+	struct AnimationPlayBackData 
+	{
+		float clipDuration;
+		float clipTime;
+		float deltaClipTime;
+
+		TArray<AnimationKeyFrame*> keyFrames;
+	};
+
 	struct AnimationDataController
 	{
 		//bones used in the animation
@@ -38,6 +59,10 @@ public:
 
 		//animation data realted to the bones
 		TMap<FString, TArray<AnimationData*>*> data;
+
+		//keyframe and play back data per animation
+		AnimationPlayBackData playBackData;
+
 		//TArray<std::pair<FString, AnimationData*>>* data;
 
 		AnimationDataController() : 
@@ -47,6 +72,12 @@ public:
 			
 		}
 	};
+
+
+	AnimationDataController* GetAnimationControllerByAnimationName(FString name)
+	{
+		return animationMap[name];
+	}
 
 private:
 

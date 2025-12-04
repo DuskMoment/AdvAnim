@@ -17,13 +17,65 @@ void ClipController::UpdateClipController(float dt)
 {
 	currClipTime += dt * currClip->RateScale; //Add reverse playback here too
 
-	if (currClipTime > currClip->GetPlayLength()) 
+	if (currClipTime > currClip->GetPlayLength())
 	{
 		//Handle looping
 		currClipTime = 0;
 	}
-
 }
+
+void ClipController::InitAnimationController(FString animationName, float timeBetween)
+{
+	//no data in the map
+	if (animationMap.IsEmpty())
+	{
+		return;
+	}
+
+	//animation did not exist
+	if (!animationMap.Contains(animationName))
+	{
+		return;
+	}
+
+	AnimationDataController* controller = animationMap[animationName];
+
+	//get the count of samples
+	FString rootName = controller->bonesNames->GetData()[0];
+	int sampleCount = controller->data[rootName]->Num();
+
+	//if (!controller->playBackData.Contains(animationName))
+	//{
+	//	//add it to the map
+	//	controller->playBackData.Add(animationName, new AnimationPlayBackData());
+	//}
+
+	//make the animation
+	AnimationPlayBackData* playBack = &controller->playBackData;
+
+	TArray<AnimationKeyFrame*>* keyFrameList = &playBack->keyFrames;
+
+	float startTime = 0;
+
+	for (int i = 0; i < sampleCount; i++)
+	{
+		AnimationKeyFrame* newKeyFrame = new AnimationKeyFrame();
+		newKeyFrame->deltaKeyframe = 0;//lerp peram
+		
+		newKeyFrame->start = startTime;//start in clip time
+		newKeyFrame->end =  startTime + timeBetween; //end in clip time
+		newKeyFrame->duration = newKeyFrame->end - newKeyFrame->start;
+		newKeyFrame->keyframeTime = 0; //current time in the key frame
+
+		startTime += newKeyFrame->end;
+
+		keyFrameList->Add(newKeyFrame);
+		
+	}
+
+	playBack->clipDuration = startTime;
+}
+
 
 BoneDataNode* ClipController::GetAssetData(UPoseableMeshComponent* mesh, USkeletalMeshComponent* skelMeshComp)
 {
