@@ -2,10 +2,10 @@
 
 #pragma once
 
+#include "ModifiedPoseableMeshComponent.h"
 #include "CoreMinimal.h"
 #include "BoneDataNode.h"
 #include <map>
-#include "Components/PoseableMeshComponent.h"
 
 /**
  * 
@@ -16,9 +16,9 @@ public:
 	ClipController();
 	~ClipController();
 
-	void UpdateClipController(float dt);
+	void UpdateClipController(float dt, UModifiedPoseableMeshComponent* mesh, USkeletalMeshComponent* skelMeshComp);
 
-	BoneDataNode* GetAssetData(UPoseableMeshComponent* mesh, USkeletalMeshComponent* skelMeshComp);
+	BoneDataNode* GetAssetData();
 
 	UAnimSequence* currClip;
 	float currClipTime;

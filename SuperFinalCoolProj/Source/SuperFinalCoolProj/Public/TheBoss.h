@@ -2,9 +2,9 @@
 
 #pragma once
 
+#include "ModifiedPoseableMeshComponent.h"
 #include "ClipController.h"
 #include "CoreMinimal.h"
-#include "Components/PoseableMeshComponent.h"
 #include "BoneDataNode.h"
 #include "Heirarchy.h"
 #include "GameFramework/Actor.h"
@@ -36,7 +36,7 @@ public:
 	Heirarchy* pH;
 
 	UPROPERTY(EditAnywhere)
-	UPoseableMeshComponent* mesh;
+	UModifiedPoseableMeshComponent* mesh;
 	USkeletalMeshComponent* skelMeshComp;
 
 	UPROPERTY(EditAnywhere)
