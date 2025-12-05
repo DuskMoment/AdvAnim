@@ -40,8 +40,8 @@ void ClipController::UpdateClipController(float dt, AnimationPlayBackData* const
 	//Updates poseable mesh bones with animation poses
 	FCompactPose OutPose = poseData.GetPose();
 
-	ForwardKinematics::UpdateFK(mesh, OutPose);
-	InverseKinematics::UpdateEffectors(mesh);
+	//ForwardKinematics::UpdateFK(mesh, OutPose);
+	//InverseKinematics::UpdateEffectors(mesh);
 
 	//MIGHT NEED TO HANDLE PAUSE
 

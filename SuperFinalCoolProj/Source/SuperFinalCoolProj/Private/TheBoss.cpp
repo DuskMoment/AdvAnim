@@ -2,6 +2,7 @@
 
 #include "TheBoss.h"
 #include "AnimationCont.h"
+#include "ForwardKinematics.h"
 
 // Sets default values
 ATheBoss::ATheBoss() : AActor()
@@ -112,8 +113,22 @@ void ATheBoss::Tick(float DeltaTime)
 
 	controller->UpdateClipController(DeltaTime, &controller->GetAnimationControllerByAnimationName("basePose")->playBackData, mesh, skelMeshComp);
 
+	ClipController::AnimationDataController* animationController = controller->GetAnimationControllerByAnimationName("basePose");
+
+	//LERP
+
+
+	
+	ForwardKinematics::UpdateFK(mesh, animationController);
+	
+
+	
+
+
+
 	//RightUpLeg
 	BoneDataNode* node = pH->FindBoneByName("RightUpLeg");
+
 	//mesh->SetBoneLocationByName("RightUpLeg", node->GetLocation() + (FVector::UpVector * 10), EBoneSpaces::ComponentSpace);
 
 	//node->SetLocation(node->GetLocation() + (FVector::UpVector * 10));

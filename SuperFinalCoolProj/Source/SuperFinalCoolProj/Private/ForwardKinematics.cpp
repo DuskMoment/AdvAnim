@@ -2,8 +2,9 @@
 
 
 #include "ForwardKinematics.h"
+#include "ClipController.h"
 
-int ForwardKinematics::UpdateFK(UPoseableMeshComponent* mesh, FCompactPose& animPoses)
+int ForwardKinematics::UpdateFK(UPoseableMeshComponent* mesh, ClipController::AnimationDataController* animationController)
 {
 	////GetAnimationPose() does concat already
 	// 
@@ -30,40 +31,72 @@ int ForwardKinematics::UpdateFK(UPoseableMeshComponent* mesh, FCompactPose& anim
 	//	//mesh->GetBoneSpaceTransforms();
 	//}
 
-	ForwardKinematics::SolvePartialFK(mesh, animPoses);
+	ForwardKinematics::SolvePartialFK(mesh, animationController);
 
 	return 1;
 }
 
-int ForwardKinematics::SolvePartialFK(UPoseableMeshComponent* mesh, FCompactPose& animPoses)
+int ForwardKinematics::SolvePartialFK(UPoseableMeshComponent* mesh, ClipController::AnimationDataController* animationController)
 {
-	TArray<FName> names;
-	mesh->GetBoneNames(names);
+	ClipController::AnimationPlayBackData* animation = &animationController->playBackData;
 
-	for (int i = 0; i < names.Num(); i++)
+	for (int i = 0; i < animationController->bonesNames->Num(); i++)
 	{
-		FName parentName = mesh->GetParentBone(names[i]);
+		FString* animBonesNames = animationController->bonesNames->GetData();
+
+		int sampleIndex = i + 1;
+		if (sampleIndex >= animationController->bonesNames->Num())
+		{
+			sampleIndex = 0;
+		}
+
+		ClipController::AnimationData** pose1 = animationController->data[animBonesNames[i]]->GetData();
+		ClipController::AnimationData** pose2 = animationController->data[animBonesNames[sampleIndex]]->GetData();
+
+		int key = animation->currentkeyFrameIndex;
+		//lerp position
+		FVector deltaLocation = (*pose2[key + 1]->location - *pose1[key]->location)
+			* animation->keyFrames[animation->currentkeyFrameIndex]->deltaKeyframe
+			+ *pose1[key]->location;
+
+		//lerp scale
+		float deltaScale = (pose2[key + 1]->scale - pose1[key]->scale)
+			* animation->keyFrames[animation->currentkeyFrameIndex]->deltaKeyframe
+			+ pose1[key]->scale;
+
+		//lerp rotation 
+		FVector deltaRot =
+			(*pose2[key + 1]->rotaion - *pose1[key]->rotaion)
+			* animation->keyFrames[animation->currentkeyFrameIndex]->deltaKeyframe
+			+ *pose1[key]->rotaion;
+
+		FTransform animPose;
+		animPose.SetLocation(deltaLocation);
+		animPose.SetRotation(deltaRot.Rotation().Quaternion());
+		animPose.SetScale3D(FVector(deltaScale));
+
+		FName parentName = mesh->GetParentBone((FName)animationController->bonesNames->GetData()[i]);
 		if (parentName == NAME_None)
 		{
-			ForwardKinematics::SolveRootFK(mesh, animPoses, names[i]);
+			ForwardKinematics::SolveRootFK(mesh, animPose, (FName)animationController->bonesNames->GetData()[i]);
 		}
 		else
 		{
-			ForwardKinematics::SolveSingleFK(mesh, animPoses, names[i], parentName);
+			ForwardKinematics::SolveSingleFK(mesh, animPose, (FName)animationController->bonesNames->GetData()[i], parentName);
 		}
 	}
 
 	return 1;
 }
 
-int ForwardKinematics::SolveRootFK(UPoseableMeshComponent* mesh, FCompactPose& animPoses, FName name)
+int ForwardKinematics::SolveRootFK(UPoseableMeshComponent* mesh, FTransform& animPose, FName name)
 {
 	FCompactPoseBoneIndex boneIndex = FCompactPoseBoneIndex(mesh->GetBoneIndex(name));
-	mesh->SetBoneTransformByName(name, animPoses[boneIndex], EBoneSpaces::ComponentSpace);
+	mesh->SetBoneTransformByName(name, animPose, EBoneSpaces::ComponentSpace);
 	return 1;
 }
 
-int ForwardKinematics::SolveSingleFK(UPoseableMeshComponent* mesh, FCompactPose& animPoses, FName name, FName parentName)
+int ForwardKinematics::SolveSingleFK(UPoseableMeshComponent* mesh, FTransform& animPose, FName name, FName parentName)
 {
 	FCompactPoseBoneIndex boneIndex = FCompactPoseBoneIndex(mesh->GetBoneIndex(name));
 	int localBoneIndex = mesh->GetBoneIndex(name);
@@ -71,9 +104,9 @@ int ForwardKinematics::SolveSingleFK(UPoseableMeshComponent* mesh, FCompactPose&
 	//FTransform currentT = mesh->GetBoneSpaceTransforms()[localBoneIndex];
 
 	FTransform parentT = mesh->GetBoneTransformByName(parentName, EBoneSpaces::ComponentSpace);
-	FTransform newT((parentT.ToMatrixWithScale() * animPoses[boneIndex].ToMatrixWithScale()));
+	FTransform newT((parentT.ToMatrixWithScale() * animPose.ToMatrixWithScale()));
 
-	mesh->SetBoneTransformByName(name, animPoses[boneIndex] * parentT, EBoneSpaces::ComponentSpace);
+	mesh->SetBoneTransformByName(name, animPose * parentT, EBoneSpaces::ComponentSpace);
 
 	//mesh->SetBoneRotationByName(name, (parentT.GetRotation() * animPoses[boneIndex].GetRotation()).Rotator(), EBoneSpaces::ComponentSpace);
 	//mesh->SetBoneLocationByName(name, animPoses[boneIndex].GetLocation(), EBoneSpaces::ComponentSpace);
