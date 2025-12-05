@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "BoneDataNode.h"
 #include <map>
-#include "Components/PoseableMeshComponent.h"
+#include "ModifiedPoseableMeshComponent.h"
 
 /**
  * 
@@ -84,7 +84,7 @@ public:
 		return animationMap[name];
 	}
 
-	void UpdateClipController(float dt, AnimationPlayBackData* const contrl);
+	void UpdateClipController(float dt, AnimationPlayBackData* const contrl, UModifiedPoseableMeshComponent* mesh, USkeletalMeshComponent* skelMeshComp);
 private:
 
 	UPROPERTY()

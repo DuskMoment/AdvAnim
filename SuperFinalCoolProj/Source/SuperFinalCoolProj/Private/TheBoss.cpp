@@ -9,7 +9,7 @@ ATheBoss::ATheBoss() : AActor()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	mesh = CreateDefaultSubobject<UPoseableMeshComponent>(TEXT("mesh"));
+	mesh = CreateDefaultSubobject<UModifiedPoseableMeshComponent>(TEXT("mesh"));
 	skelMeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("skelMeshComp"));
 	
 	SetRootComponent(mesh);
@@ -110,14 +110,13 @@ void ATheBoss::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	controller->UpdateClipController(DeltaTime, &controller->GetAnimationControllerByAnimationName("basePose")->playBackData);
+	controller->UpdateClipController(DeltaTime, &controller->GetAnimationControllerByAnimationName("basePose")->playBackData, mesh, skelMeshComp);
 
 	//RightUpLeg
 	BoneDataNode* node = pH->FindBoneByName("RightUpLeg");
-	mesh->SetBoneLocationByName("RightUpLeg", node->GetLocation() + (FVector::UpVector * 10), EBoneSpaces::ComponentSpace);
+	//mesh->SetBoneLocationByName("RightUpLeg", node->GetLocation() + (FVector::UpVector * 10), EBoneSpaces::ComponentSpace);
 
-	node->SetLocation(node->GetLocation() + (FVector::UpVector * 10));
-	//controller->GetAssetData(mesh, skelMeshComp);
+	//node->SetLocation(node->GetLocation() + (FVector::UpVector * 10));
 }
 
 void ATheBoss::ApplyChangeToMesh(FName boneName)

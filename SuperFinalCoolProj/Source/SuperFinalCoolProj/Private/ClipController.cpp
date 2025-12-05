@@ -3,6 +3,8 @@
 
 #include "ClipController.h"
 #include "EditorFramework/AssetImportData.h"
+#include "ForwardKinematics.h"
+#include "InverseKinematics.h"
 
 
 ClipController::ClipController()
@@ -13,7 +15,7 @@ ClipController::~ClipController()
 {
 }
 
-void ClipController::UpdateClipController(float dt, AnimationPlayBackData* const contrl)
+void ClipController::UpdateClipController(float dt, AnimationPlayBackData* const contrl, UModifiedPoseableMeshComponent* mesh, USkeletalMeshComponent* skelMeshComp)
 {
 	currClipTime += dt * currClip->RateScale; //Add reverse playback here too
 
@@ -22,6 +24,24 @@ void ClipController::UpdateClipController(float dt, AnimationPlayBackData* const
 		//Handle looping
 		currClipTime = 0;
 	}
+
+	FCompactPose outPose;
+	FBlendedCurve outCurve;
+	FStackCustomAttributes OutAttr;
+
+	//Get bone container for required bones to get animation poses for
+	outPose.SetBoneContainer(&skelMeshComp->GetAnimInstance()->GetRequiredBones());
+
+	FAnimationPoseData poseData(outPose, outCurve, OutAttr);
+
+	//Gets animation poses
+	currClip->GetAnimationPose(poseData, FAnimExtractContext(currClipTime));
+
+	//Updates poseable mesh bones with animation poses
+	FCompactPose OutPose = poseData.GetPose();
+
+	ForwardKinematics::UpdateFK(mesh, OutPose);
+	InverseKinematics::UpdateEffectors(mesh);
 
 	//MIGHT NEED TO HANDLE PAUSE
 
@@ -109,9 +129,6 @@ void ClipController::UpdateClipController(float dt, AnimationPlayBackData* const
 	//			ii.step(s) take
 	//			iii.clip exited
 	//3 normailzed keyframe/clip time: relivitve time /duration
-
-
-
 
 }
 
@@ -450,67 +467,5 @@ BoneDataNode* ClipController::GetAssetData(UPoseableMeshComponent* mesh, USkelet
 
 	}
 
-
-
-
 	return NULL;
-
-
-
-
-
-
-
-
-	//if (GEngine)
-	//	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Track NamesSES: %s"), currClip->GetSkeleton()->GetReferenceSkeleton().FindBoneIndex()));
-
-	//if (GEngine)
-	//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Num Ref Bones %i"), currClip->GetSkeleton()->GetReferenceSkeleton().GetNum()));
-
-	//TArray<FAnimNotifyTrack> track = currClip->AnimNotifyTracks;
-	//FAnimNotifyTrack* dat = track.GetData();
-
-	//FCompactPose outPose;
-	//FBlendedCurve outCurve;
-	//FStackCustomAttributes OutAttr;
-	//
-	//if (!skelMeshComp)
-	//{
-	//	if (GEngine)
-	//		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Skel Mesh Comp does not exist")));
-	//	return nullptr;
-	//}
-
-	//if (!skelMeshComp->GetAnimInstance())
-	//{
-	//	if (GEngine)
-	//		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Skel Mesh Comp AnimInstance does not exist")));
-	//	return nullptr;
-	//}
-
-	////Get bone container for required bones to get animation poses for
-	//outPose.SetBoneContainer(&skelMeshComp->GetAnimInstance()->GetRequiredBones());
-
-	//if (GEngine)
-	//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Num Required Bones %i"), skelMeshComp->GetAnimInstance()->GetRequiredBones().GetNumBones()));
-
-	//FAnimationPoseData poseData(outPose, outCurve, OutAttr);
-
-	////Gets animation poses
-	//currClip->GetAnimationPose(poseData, FAnimExtractContext(currClipTime));
-
-	////Updates poseable mesh bones with animation poses
-	//FCompactPose OutPose = poseData.GetPose();
-	//for (FCompactPoseBoneIndex BoneIndex : OutPose.ForEachBoneIndex())
-	//{
-	//	if (BoneIndex.GetInt() < currClip->GetSkeleton()->GetReferenceSkeleton().GetNum()) {
-	//		const FTransform& BoneTransform = OutPose[BoneIndex];
-	//		const FTransform& BaseBoneTransform = currClip->GetSkeleton()->GetReferenceSkeleton().GetBoneAbsoluteTransform(BoneIndex.GetInt());
-	//		const FName BoneName = currClip->GetSkeleton()->GetReferenceSkeleton().GetBoneName(BoneIndex.GetInt());
-	//		mesh->SetBoneTransformByName(BoneName, BoneTransform, EBoneSpaces::ComponentSpace);
-	//	}
-	//}
-	//	
-	//return new BoneDataNode();
 }
