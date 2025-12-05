@@ -114,8 +114,8 @@ void ClipController::UpdateClipController(float dt, AnimationPlayBackData* const
 
 	////Gets normalized time for current keyframe and clip - Base created by Tristan and refactored/imroved by Will and Tristan
 	//clipCtrl->keyframeParam = (clipCtrl->clipTime_sec - keyFrameStartTime_T0) * clipCtrl->keyframe[clipCtrl->keyframeIndex].durationInv;
-	contrl->keyFrames[contrl->currentkeyFrameIndex]->deltaKeyframe = (contrl->clipTime - keyFrameStartTime_T0)/(contrl->keyFrames[contrl->currentkeyFrameIndex]->duration);
-	contrl->deltaClipTime = (contrl->clipTime - contrl->clipDuration) / contrl->clipDuration;
+	contrl->keyFrames[contrl->currentkeyFrameIndex]->deltaKeyframe = (keyFrameEndTime_T1 - contrl->clipTime)/(contrl->keyFrames[contrl->currentkeyFrameIndex]->duration); //this needs to be keyframediation
+	contrl->deltaClipTime = (contrl->clipDuration - contrl->clipTime) / contrl->clipDuration;
 	//clipCtrl->clipParam = clipCtrl->clip->duration_sec * clipCtrl->clip->durationInv;
 
 	//2. resolve key frame
@@ -426,14 +426,14 @@ BoneDataNode* ClipController::GetAssetData(UPoseableMeshComponent* mesh, USkelet
 					array[i].ParseIntoArray(splitData, TEXT("\t"), true);
 
 					insertData->location = new FVector(
-						FCString::Atod(*splitData[1]), 
-						FCString::Atod(*splitData[2]), 
-						FCString::Atod(*splitData[3]));
+						FCString::Atod(*splitData[1]) * 0.1,
+						FCString::Atod(*splitData[3]) * 0.1,
+						FCString::Atod(*splitData[2]) * 0.1); // swapped y and z because unreal
 
 					insertData->rotaion = new FVector(
 						FCString::Atod(*splitData[4]),
 						FCString::Atod(*splitData[5]),
-						FCString::Atod(*splitData[6]));
+						FCString::Atod(*splitData[6]));// swapped y and z because unreal
 
 					insertData->scale = FCString::Atod(*splitData[7]);
 

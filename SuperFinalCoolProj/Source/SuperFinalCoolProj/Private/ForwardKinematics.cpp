@@ -4,7 +4,7 @@
 #include "ForwardKinematics.h"
 #include "ClipController.h"
 
-int ForwardKinematics::UpdateFK(UPoseableMeshComponent* mesh, ClipController::AnimationDataController* animationController)
+int ForwardKinematics::UpdateFK(UPoseableMeshComponent* mesh, ClipController::AnimationDataController* animationController, Heirarchy& h)
 {
 	////GetAnimationPose() does concat already
 	// 
@@ -31,12 +31,12 @@ int ForwardKinematics::UpdateFK(UPoseableMeshComponent* mesh, ClipController::An
 	//	//mesh->GetBoneSpaceTransforms();
 	//}
 
-	ForwardKinematics::SolvePartialFK(mesh, animationController);
+	ForwardKinematics::SolvePartialFK(mesh, animationController, h);
 
 	return 1;
 }
 
-int ForwardKinematics::SolvePartialFK(UPoseableMeshComponent* mesh, ClipController::AnimationDataController* animationController)
+int ForwardKinematics::SolvePartialFK(UPoseableMeshComponent* mesh, ClipController::AnimationDataController* animationController, Heirarchy& h)
 {
 	ClipController::AnimationPlayBackData* animation = &animationController->playBackData;
 
@@ -51,12 +51,12 @@ int ForwardKinematics::SolvePartialFK(UPoseableMeshComponent* mesh, ClipControll
 		}
 
 		ClipController::AnimationData** pose1 = animationController->data[animBonesNames[i]]->GetData();
-		ClipController::AnimationData** pose2 = animationController->data[animBonesNames[sampleIndex]]->GetData();
+		ClipController::AnimationData** pose2 = animationController->data[animBonesNames[i]]->GetData();
 
 		int key = animation->currentkeyFrameIndex;
 		//lerp position
 		FVector deltaLocation = (*pose2[key + 1]->location - *pose1[key]->location)
-			* animation->keyFrames[animation->currentkeyFrameIndex]->deltaKeyframe
+			* animation->keyFrames[key]->deltaKeyframe
 			+ *pose1[key]->location;
 
 		//lerp scale
@@ -75,14 +75,15 @@ int ForwardKinematics::SolvePartialFK(UPoseableMeshComponent* mesh, ClipControll
 		animPose.SetRotation(deltaRot.Rotation().Quaternion());
 		animPose.SetScale3D(FVector(deltaScale));
 
-		FName parentName = mesh->GetParentBone((FName)animationController->bonesNames->GetData()[i]);
+		FName parentName = h.FindBoneByName((FName)animBonesNames[i])->GetParentName(); //gets the parent bone from the heriarchy
+		//FName parentName = mesh->GetParentBone((FName)animationController->bonesNames->GetData()[i]);
 		if (parentName == NAME_None)
 		{
 			ForwardKinematics::SolveRootFK(mesh, animPose, (FName)animationController->bonesNames->GetData()[i]);
 		}
 		else
 		{
-			ForwardKinematics::SolveSingleFK(mesh, animPose, (FName)animationController->bonesNames->GetData()[i], parentName);
+			ForwardKinematics::SolveSingleFK(mesh, animPose, (FName)animBonesNames[i], parentName);
 		}
 	}
 
@@ -93,6 +94,11 @@ int ForwardKinematics::SolveRootFK(UPoseableMeshComponent* mesh, FTransform& ani
 {
 	FCompactPoseBoneIndex boneIndex = FCompactPoseBoneIndex(mesh->GetBoneIndex(name));
 	mesh->SetBoneTransformByName(name, animPose, EBoneSpaces::ComponentSpace);
+
+	
+	//if (GEngine)
+	//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, 
+	//		FString::Printf(TEXT("animPose x:%f y:%f z:%f"), animPose.GetLocation().X, animPose.GetLocation().Y, animPose.GetLocation().Z));
 	return 1;
 }
 

@@ -119,7 +119,7 @@ void ATheBoss::Tick(float DeltaTime)
 
 
 	
-	ForwardKinematics::UpdateFK(mesh, animationController);
+	ForwardKinematics::UpdateFK(mesh, animationController, *pH);
 	
 
 	
