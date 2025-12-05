@@ -110,7 +110,7 @@ void ATheBoss::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	controller->UpdateClipController(DeltaTime);
+	controller->UpdateClipController(DeltaTime, &controller->GetAnimationControllerByAnimationName("basePose")->playBackData);
 
 	//RightUpLeg
 	BoneDataNode* node = pH->FindBoneByName("RightUpLeg");

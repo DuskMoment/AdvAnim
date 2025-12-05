@@ -16,10 +16,11 @@ public:
 	ClipController();
 	~ClipController();
 
-	void UpdateClipController(float dt);
+	
 
 	void InitAnimationController(FString animationName, float timeBetween);
 	BoneDataNode* GetAssetData(UPoseableMeshComponent* mesh, USkeletalMeshComponent* skelMeshComp);
+
 
 
 	UAnimSequence* currClip;
@@ -45,9 +46,12 @@ public:
 
 	struct AnimationPlayBackData 
 	{
+		float speed = 0.5f;
 		float clipDuration;
 		float clipTime;
 		float deltaClipTime;
+
+		int currentkeyFrameIndex = 0;
 
 		TArray<AnimationKeyFrame*> keyFrames;
 	};
@@ -63,6 +67,7 @@ public:
 		//keyframe and play back data per animation
 		AnimationPlayBackData playBackData;
 
+		//maybe add a lerped pose
 		//TArray<std::pair<FString, AnimationData*>>* data;
 
 		AnimationDataController() : 
@@ -79,6 +84,7 @@ public:
 		return animationMap[name];
 	}
 
+	void UpdateClipController(float dt, AnimationPlayBackData* const contrl);
 private:
 
 	UPROPERTY()

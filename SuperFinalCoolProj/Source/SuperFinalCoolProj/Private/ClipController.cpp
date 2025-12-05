@@ -13,7 +13,7 @@ ClipController::~ClipController()
 {
 }
 
-void ClipController::UpdateClipController(float dt)
+void ClipController::UpdateClipController(float dt, AnimationPlayBackData* const contrl)
 {
 	currClipTime += dt * currClip->RateScale; //Add reverse playback here too
 
@@ -22,6 +22,97 @@ void ClipController::UpdateClipController(float dt)
 		//Handle looping
 		currClipTime = 0;
 	}
+
+	//MIGHT NEED TO HANDLE PAUSE
+
+	//Updates clip time
+	contrl->clipTime += dt * contrl->speed;
+
+	float clipDuration = contrl->clipDuration;
+	////Handles transitions - Tristan coded switches and Stop and Loop transitions. Will coded Ping Pong.
+
+	//For forward transition if clip time exceeds clip duration
+	if (contrl->clipTime > clipDuration)
+	{
+		float overflowTime = contrl->clipTime - clipDuration;
+
+		//Accounts for overflow time steps that are longer than the clip duration
+		while (overflowTime > clipDuration)
+		{
+			overflowTime -= clipDuration;
+		}
+
+		//just loops rn
+		contrl->currentkeyFrameIndex = 0;
+		contrl->clipTime = overflowTime;
+
+	}
+	else if (contrl->clipTime < 0)  //For reverse transition if clip time goes below 0
+	{
+		float overflowTime = -contrl->clipTime;
+
+		//Accounts for overflow time steps that are longer than the clip duration
+		while (overflowTime > clipDuration)
+		{
+			overflowTime -= clipDuration;
+		}
+
+		//pause if go past the start of the clip
+		contrl->speed = 0;
+		contrl->clipTime = 0;
+		contrl->currentkeyFrameIndex = 0;
+	}
+
+	////Finds current keyframe based on transitions and updated clip time
+
+	//Picks a starting keyframe - 
+	float keyFrameStartTime_T0 = contrl->keyFrames[contrl->currentkeyFrameIndex]->start;
+	float keyFrameEndTime_T1 = contrl->keyFrames[contrl->currentkeyFrameIndex]->end;
+
+	// keyFrameStartTime_T0 = clipCtrl->clipPool->sample[clipCtrl->keyframe[clipCtrl->keyframeIndex].sampleIndex0].time_sec;
+	//a3f64 keyFrameEndTime_T1 = clipCtrl->clipPool->sample[clipCtrl->keyframe[clipCtrl->keyframeIndex].sampleIndex1].time_sec;
+
+	//Makes sure it is the current keyframe Tristan created and refactored/imroved by Will and Tristan
+	while (contrl->clipTime >= keyFrameEndTime_T1 || contrl->clipTime < keyFrameStartTime_T0)
+	{
+		//clipCtrl->clipPool->clip->keyframeDirection > 0 ? clipCtrl->keyframeIndex++ : clipCtrl->keyframeIndex--;
+
+		contrl->currentkeyFrameIndex++;
+
+		if (contrl->currentkeyFrameIndex < contrl->keyFrames.Num())
+		{
+			keyFrameStartTime_T0 = contrl->keyFrames[contrl->currentkeyFrameIndex]->start;
+			keyFrameEndTime_T1 = contrl->keyFrames[contrl->currentkeyFrameIndex]->end;
+
+			//keyFrameStartTime_T0 = clipCtrl->clipPool->sample[clipCtrl->keyframe[clipCtrl->keyframeIndex].sampleIndex0].time_sec;
+			//keyFrameEndTime_T1 = clipCtrl->clipPool->sample[clipCtrl->keyframe[clipCtrl->keyframeIndex].sampleIndex1].time_sec;
+		}
+
+		////Don't need to account for if index goes out of range here since that is done in the transitions section
+
+	}
+
+	////Gets normalized time for current keyframe and clip - Base created by Tristan and refactored/imroved by Will and Tristan
+	//clipCtrl->keyframeParam = (clipCtrl->clipTime_sec - keyFrameStartTime_T0) * clipCtrl->keyframe[clipCtrl->keyframeIndex].durationInv;
+	contrl->keyFrames[contrl->currentkeyFrameIndex]->deltaKeyframe = (contrl->clipTime - keyFrameStartTime_T0)/(contrl->keyFrames[contrl->currentkeyFrameIndex]->duration);
+	contrl->deltaClipTime = (contrl->clipTime - contrl->clipDuration) / contrl->clipDuration;
+	//clipCtrl->clipParam = clipCtrl->clip->duration_sec * clipCtrl->clip->durationInv;
+
+	//2. resolve key frame
+	//		a. pause dt = 0
+	//		b. forward dt > 0
+	//			i.stop
+	//			ii.step(s) take
+	//			iii.clip exited
+	//		c. reverse dt < 0
+	//			i.stop
+	//			ii.step(s) take
+	//			iii.clip exited
+	//3 normailzed keyframe/clip time: relivitve time /duration
+
+
+
+
 }
 
 void ClipController::InitAnimationController(FString animationName, float timeBetween)
@@ -57,7 +148,7 @@ void ClipController::InitAnimationController(FString animationName, float timeBe
 
 	float startTime = 0;
 
-	for (int i = 0; i < sampleCount; i++)
+	for (int i = 0; i < sampleCount - 1; i++)
 	{
 		AnimationKeyFrame* newKeyFrame = new AnimationKeyFrame();
 		newKeyFrame->deltaKeyframe = 0;//lerp peram
@@ -67,7 +158,7 @@ void ClipController::InitAnimationController(FString animationName, float timeBe
 		newKeyFrame->duration = newKeyFrame->end - newKeyFrame->start;
 		newKeyFrame->keyframeTime = 0; //current time in the key frame
 
-		startTime += newKeyFrame->end;
+		startTime += timeBetween;
 
 		keyFrameList->Add(newKeyFrame);
 		
