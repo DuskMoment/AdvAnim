@@ -97,6 +97,11 @@ void ATheBoss::BeginPlay()
 
 	pH = new Heirarchy(&data);
 
+	int localBoneIndex = mesh->GetBoneIndex((FName)"Hips");
+	FTransform localBoneTransform = mesh->GetBoneSpaceTransforms()[localBoneIndex];
+	pH->testBase = localBoneTransform;
+	
+
 	if (pH->GetBoneCount() != 0)
 	{
 		if (GEngine)

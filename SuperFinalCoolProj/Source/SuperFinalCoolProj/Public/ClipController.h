@@ -27,6 +27,8 @@ public:
 	float currClipTime;
 	float currClipTimeNormalized;
 
+	FTransform baseTransformation;
+
 	struct AnimationData
 	{
 		FVector* location;

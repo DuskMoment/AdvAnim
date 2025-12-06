@@ -189,7 +189,6 @@ BoneDataNode* ClipController::GetAssetData(UPoseableMeshComponent* mesh, USkelet
 {
 	//FMemMark Mark(FMemStack::Get());
 	
-
 	FString FilePath = FPaths::ProjectContentDir() + TEXT("/xbot_loco.htr");
 
 	if (!FPlatformFileManager::Get().GetPlatformFile().FileExists(*FilePath))
