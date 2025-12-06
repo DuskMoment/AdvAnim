@@ -431,9 +431,9 @@ BoneDataNode* ClipController::GetAssetData(UPoseableMeshComponent* mesh, USkelet
 						FCString::Atod(*splitData[2]) * 0.1); // swapped y and z because unreal
 
 					insertData->rotaion = new FVector(
-						FCString::Atod(*splitData[4]),
 						FCString::Atod(*splitData[5]),
-						FCString::Atod(*splitData[6]));// swapped y and z because unreal
+						FCString::Atod(*splitData[6]),
+						FCString::Atod(*splitData[4]));// swapped y and z because unreal
 
 					insertData->scale = FCString::Atod(*splitData[7]);
 

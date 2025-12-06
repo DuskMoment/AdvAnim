@@ -4,7 +4,7 @@
 #include "ForwardKinematics.h"
 #include "ClipController.h"
 
-int ForwardKinematics::UpdateFK(UPoseableMeshComponent* mesh, ClipController::AnimationDataController* animationController, Heirarchy& h)
+int ForwardKinematics::UpdateFK(UModifiedPoseableMeshComponent* mesh, ClipController::AnimationDataController* animationController, Heirarchy& h)
 {
 	////GetAnimationPose() does concat already
 	// 
@@ -31,7 +31,78 @@ int ForwardKinematics::UpdateFK(UPoseableMeshComponent* mesh, ClipController::An
 	//	//mesh->GetBoneSpaceTransforms();
 	//}
 
-	ForwardKinematics::SolvePartialFK(mesh, animationController, h);
+	ClipController::AnimationPlayBackData* animation = &animationController->playBackData;
+
+	for (int i = 0; i < animationController->bonesNames->Num(); i++)
+	{
+		FString* animBonesNames = animationController->bonesNames->GetData();
+
+		ClipController::AnimationData** pose1 = animationController->data[animBonesNames[i]]->GetData();
+
+		int key = animation->currentkeyFrameIndex;
+		if (key < 0 || key > animationController->bonesNames->Num())
+		{
+			key = 0;
+		}
+
+		//lerp position
+		FVector deltaLocation = *pose1[key]->location;
+
+		//lerp scale
+		float deltaScale = pose1[key]->scale;
+
+		//lerp rotation 
+		FVector deltaRot = *pose1[key]->rotaion;
+
+		FTransform animPose;
+		animPose.SetLocation(deltaLocation);
+		animPose.SetRotation(deltaRot.Rotation().Quaternion());
+		animPose.SetScale3D(FVector(deltaScale));
+
+
+		int baseBoneIndex = mesh->SkeletalMesh->RefSkeleton.FindBoneIndex((FName)animBonesNames[i]);
+		if (baseBoneIndex != -1) 
+		{
+			int localBoneIndex = mesh->GetBoneIndex((FName)animBonesNames[i]);
+			FName localBoneParentName = mesh->GetParentBone((FName)animBonesNames[i]);
+			int localBoneParentIndex = mesh->GetBoneIndex(localBoneParentName);
+
+			FTransform boneBaseLocalTransform = mesh->GetBoneSpaceTransforms()[localBoneIndex];
+			FTransform boneBaseObjectTransform = mesh->GetBoneTransformByName((FName)animBonesNames[i], EBoneSpaces::ComponentSpace);
+			FTransform boneBaseWorldTransform = mesh->GetBoneTransformByName((FName)animBonesNames[i], EBoneSpaces::WorldSpace);
+
+			FTransform refBoneBaseTransform = mesh->SkeletalMesh->RefSkeleton.GetRefBonePose()[baseBoneIndex];
+
+			FTransform refBoneParentBaseTransform;
+			if (localBoneParentIndex != -1)
+			{
+				refBoneParentBaseTransform = mesh->SkeletalMesh->RefSkeleton.GetRefBonePose()[localBoneParentIndex];
+
+			}
+			else
+			{
+				refBoneParentBaseTransform = FTransform::Identity;
+			}
+
+			animPose = animPose;
+
+			if (GEngine) {
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red,
+					FString::Printf(TEXT("World x:%s %s"), *((FName)animBonesNames[i]).ToString(), *refBoneBaseTransform.ToString()));
+				/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red,
+					FString::Printf(TEXT("World x:%s %s"), *((FName)animBonesNames[i]).ToString(), *animPose.ToString()));*/
+			}
+
+			animPose.SetLocation(deltaLocation + refBoneBaseTransform.GetLocation());
+			animPose.SetRotation(refBoneBaseTransform.GetRotation() * boneBaseLocalTransform.GetRotation());
+			animPose.SetScale3D(FVector(deltaScale) * refBoneBaseTransform.GetScale3D().X);
+
+			//mesh->SetBoneTransformByName((FName)animBonesNames[i], animPose, EBoneSpaces::ComponentSpace);
+			mesh->SetBoneSpaceTranformByName(refBoneBaseTransform, (FName)animBonesNames[i]);
+		}
+	}
+
+	//ForwardKinematics::SolvePartialFK(mesh, animationController, h);
 
 	return 1;
 }
@@ -74,6 +145,15 @@ int ForwardKinematics::SolvePartialFK(UPoseableMeshComponent* mesh, ClipControll
 		animPose.SetLocation(deltaLocation);
 		animPose.SetRotation(deltaRot.Rotation().Quaternion());
 		animPose.SetScale3D(FVector(deltaScale));
+
+		/*int baseBoneIndex = mesh->SkeletalMesh->RefSkeleton.FindBoneIndex((FName)animBonesNames[i]);
+		if (baseBoneIndex != -1)
+		{
+			FTransform refBoneBaseTransform = mesh->SkeletalMesh->RefSkeleton.GetRefBonePose()[baseBoneIndex];
+			animPose.SetLocation(animPose.GetLocation() - refBoneBaseTransform.GetLocation());
+			animPose.SetRotation(animPose.GetRotation() * refBoneBaseTransform.GetRotation());
+			animPose.SetScale3D(FVector(deltaScale));
+		}*/
 
 		FName parentName = h.FindBoneByName((FName)animBonesNames[i])->GetParentName(); //gets the parent bone from the heriarchy
 		//FName parentName = mesh->GetParentBone((FName)animationController->bonesNames->GetData()[i]);

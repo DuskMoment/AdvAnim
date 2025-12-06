@@ -5,7 +5,7 @@ FileVersion 1
 NumSegments 67
 NumFrames 2084
 DataFrameRate 24
-EulerRotationOrder ZYX
+EulerRotationOrder YZX
 CalibrationUnits mm
 RotationUnits Degrees
 GlobalAxisofGravity Y
