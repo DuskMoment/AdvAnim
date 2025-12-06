@@ -11,7 +11,7 @@ ATheBoss::ATheBoss() : AActor()
 	PrimaryActorTick.bCanEverTick = true;
 
 	mesh = CreateDefaultSubobject<UModifiedPoseableMeshComponent>(TEXT("mesh"));
-	skelMeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("skelMeshComp"));
+	//skelMeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("skelMeshComp"));
 	
 	SetRootComponent(mesh);
 
@@ -39,38 +39,40 @@ void ATheBoss::BeginPlay()
 	}
 
 	mesh->SetSkeletalMesh(skelMesh, true);
-	skelMeshComp->SetSkeletalMesh(skelMesh, true);
+	//skelMeshComp->SetSkeletalMesh(skelMesh, true);
 
-	mesh->CopyPoseFromSkeletalComponent(skelMeshComp);
+	//mesh->CopyPoseFromSkeletalComponent(skelMeshComp);
 
 
 	
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Black, FString::Printf(TEXT("Atempting to init")));
 
-	skelMeshComp->SetAnimInstanceClass(animInst);
-	skelMeshComp->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+	//skelMeshComp->SetAnimInstanceClass(animInst);
+	//skelMeshComp->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 
 
-	if (animInst)
+	/*if (animInst)
 	{
 		if (GEngine)
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString::Printf(TEXT("FOUND THE BP")));
-	}
+	}*/
 
-	if (!skelMeshComp->HasValidAnimationInstance())
+	/*if (!skelMeshComp->HasValidAnimationInstance())
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString::Printf(TEXT("NO INSTANCE")));
-	}
-	else
+	}*/
+	/*else
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString::Printf(TEXT("HAS INSTANCE")));
-	}
+	}*/
 
 	mesh->GetBoneNames(names);
 	mesh->bDisplayBones = true;
 
+	TArray<FTransform> localBones;
 	size_t boneCount = mesh->GetNumBones();
+
 	for (int i = 0; i < names.Num(); i++)
 	{
 		//get all of the data and plasice it into a struct
@@ -97,9 +99,17 @@ void ATheBoss::BeginPlay()
 
 	pH = new Heirarchy(&data);
 
-	int localBoneIndex = mesh->GetBoneIndex((FName)"Hips");
+	for (int i = 0; i < names.Num(); i++)
+	{
+		int localBoneIndex = mesh->GetBoneIndex(names[i]);
+		UE_LOG(LogTemp, Warning, TEXT("BoneIndex at name %i"), localBoneIndex);
+	}
+	
+
+	pH->basePose = mesh->GetBoneSpaceTransforms();
+	/*int localBoneIndex = mesh->GetBoneIndex((FName)"Hips");
 	FTransform localBoneTransform = mesh->GetBoneSpaceTransforms()[localBoneIndex];
-	pH->testBase = localBoneTransform;
+	pH->testBase = localBoneTransform;*/
 	
 
 	if (pH->GetBoneCount() != 0)
@@ -116,7 +126,7 @@ void ATheBoss::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	controller->UpdateClipController(DeltaTime, &controller->GetAnimationControllerByAnimationName("basePose")->playBackData, mesh, skelMeshComp);
+	controller->UpdateClipController(DeltaTime, &controller->GetAnimationControllerByAnimationName("basePose")->playBackData, mesh);
 
 	ClipController::AnimationDataController* animationController = controller->GetAnimationControllerByAnimationName("basePose");
 

@@ -15,7 +15,7 @@ ClipController::~ClipController()
 {
 }
 
-void ClipController::UpdateClipController(float dt, AnimationPlayBackData* const contrl, UModifiedPoseableMeshComponent* mesh, USkeletalMeshComponent* skelMeshComp)
+void ClipController::UpdateClipController(float dt, AnimationPlayBackData* const contrl, UModifiedPoseableMeshComponent* mesh)
 {
 	currClipTime += dt * currClip->RateScale; //Add reverse playback here too
 
@@ -30,15 +30,15 @@ void ClipController::UpdateClipController(float dt, AnimationPlayBackData* const
 	FStackCustomAttributes OutAttr;
 
 	//Get bone container for required bones to get animation poses for
-	outPose.SetBoneContainer(&skelMeshComp->GetAnimInstance()->GetRequiredBones());
+	//outPose.SetBoneContainer(&skelMeshComp->GetAnimInstance()->GetRequiredBones());
 
 	FAnimationPoseData poseData(outPose, outCurve, OutAttr);
 
 	//Gets animation poses
-	currClip->GetAnimationPose(poseData, FAnimExtractContext(currClipTime));
+	//currClip->GetAnimationPose(poseData, FAnimExtractContext(currClipTime));
 
 	//Updates poseable mesh bones with animation poses
-	FCompactPose OutPose = poseData.GetPose();
+	//FCompactPose OutPose = poseData.GetPose();
 
 	//ForwardKinematics::UpdateFK(mesh, OutPose);
 	//InverseKinematics::UpdateEffectors(mesh);
@@ -318,9 +318,16 @@ BoneDataNode* ClipController::GetAssetData(UPoseableMeshComponent* mesh, USkelet
 				FString left;
 				FString right;
 
+				int counter = 0;
 				//add names to the animation map
 				while (!array[i].Contains("["))
 				{
+					if (counter == 67)
+					{
+
+					}
+
+					
 					//THIS SHOULD BE A LIST OF NAMES
 					FString nameData = array[i];
 					TArray<FString> splitData;
@@ -331,6 +338,7 @@ BoneDataNode* ClipController::GetAssetData(UPoseableMeshComponent* mesh, USkelet
 					if (controller != nullptr && !controller->bonesNames->Contains(splitData[0]))
 					{
 						controller->bonesNames->Add(splitData[0]);
+						counter++;
 					}
 
 					//progress pointer
@@ -425,9 +433,9 @@ BoneDataNode* ClipController::GetAssetData(UPoseableMeshComponent* mesh, USkelet
 					array[i].ParseIntoArray(splitData, TEXT("\t"), true);
 
 					insertData->location = new FVector(
-						FCString::Atod(*splitData[1]) * 0.1,
-						FCString::Atod(*splitData[3]) * 0.1,
-						FCString::Atod(*splitData[2]) * 0.1); // swapped y and z because unreal
+						FCString::Atod(*splitData[1]) * 0.2,
+						FCString::Atod(*splitData[3]) * 0.2,
+						FCString::Atod(*splitData[2]) * 0.2 ); // swapped y and z because unreal * 0.1
 
 					insertData->rotaion = new FVector(
 						FCString::Atod(*splitData[5]),

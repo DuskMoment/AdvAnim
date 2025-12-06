@@ -86,7 +86,7 @@ public:
 		return animationMap[name];
 	}
 
-	void UpdateClipController(float dt, AnimationPlayBackData* const contrl, UModifiedPoseableMeshComponent* mesh, USkeletalMeshComponent* skelMeshComp);
+	void UpdateClipController(float dt, AnimationPlayBackData* const contrl, UModifiedPoseableMeshComponent* mesh);
 private:
 
 	UPROPERTY()

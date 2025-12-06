@@ -31,5 +31,5 @@ public:
 	const BoneDataNode* GetBoneBasePose();
 	BoneDataNode* FindBoneByName(FName name);
 
-	FTransform testBase;
+	TArray<FTransform> basePose;
 };
