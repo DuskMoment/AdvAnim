@@ -25,25 +25,20 @@ int ForwardKinematics::UpdateFK(UModifiedPoseableMeshComponent* mesh, ClipContro
 	UE_LOG(LogTemp, Warning, TEXT("numberOfBaseBoneNames %i"), h.basePose.Num());
 
 
-	ClipController::AnimationData** testPoseList = animationController->data["Spine"]->GetData();
-
-	ClipController::AnimationData* testPose = testPoseList[0];
-
-	/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red,
-		FString::Printf(TEXT("animPose x: %s %f y:%f z:%f"), testPose->location->X, testPose->location->Y, testPose->location->Z));
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green,
-		FString::Printf(TEXT("basePose x: %S %f y:%f z:%f"), h.basePose[1].GetLocation().X, h.basePose[1].GetLocation().Y, h.basePose[1].GetLocation().Z));*/
-
 
 	for (int i = 0; i < names.Num(); i++)
 	{
-		if (mesh->GetBoneIndex((FName)names[i]) != -1)
+		if (!animationController->data.Contains(names[i].ToString()))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("this bones does not exist in the map %s"), *names[i].ToString());
+		}
+		else if (mesh->GetBoneIndex((FName)names[i]) != -1)
 		{
 			//get the data at that bone
 			ClipController::AnimationData** pose1 = animationController->data[names[i].ToString()]->GetData();
 
 			//just use the first key frame for now
-			int key = 0;
+			int key = 30;
 
 			//get pose location
 			FVector deltaLocation = *pose1[key]->location;
@@ -91,9 +86,9 @@ int ForwardKinematics::UpdateFK(UModifiedPoseableMeshComponent* mesh, ClipContro
 		}
 	}
 
-	mesh->bDisplayBones = true;
+	//mesh->bDisplayBones = true;
 	mesh->RefreshBoneTransforms();
-	ForwardKinematics::SolvePartialFK(mesh, animationController, h);
+	//ForwardKinematics::SolvePartialFK(mesh, animationController, h);
 
 
 	return 1;
@@ -107,66 +102,72 @@ int ForwardKinematics::SolvePartialFK(UPoseableMeshComponent* mesh, ClipControll
 	mesh->GetBoneNames(names);
 	for (int i = 0; i < names.Num(); i++)
 	{
-		FString* animBonesNames = animationController->bonesNames->GetData();
 
-		int sampleIndex = i + 1;
-		if (sampleIndex >= animationController->bonesNames->Num())
+		if (animationController->data.Contains(names[i].ToString()))//skip the bone not in the map
 		{
-			sampleIndex = 0;
-		}
+			FString* animBonesNames = animationController->bonesNames->GetData();
 
-		ClipController::AnimationData** pose1 = animationController->data[names[i].ToString()]->GetData();
-		ClipController::AnimationData** pose2 = animationController->data[names[i].ToString()]->GetData();
+			int sampleIndex = i + 1;
+			if (sampleIndex >= animationController->bonesNames->Num())
+			{
+				sampleIndex = 0;
+			}
 
-		int key = animation->currentkeyFrameIndex;
-		//lerp position
-		FVector deltaLocation = (*pose2[key + 1]->location - *pose1[key]->location)
-			* animation->keyFrames[key]->deltaKeyframe
-			+ *pose1[key]->location;
+			//issue with the top of head bone not being in the animation
+			ClipController::AnimationData** pose1 = animationController->data[names[i].ToString()]->GetData();
+			ClipController::AnimationData** pose2 = animationController->data[names[i].ToString()]->GetData();
 
-		deltaLocation += h.basePose[i].GetLocation() - deltaLocation;
+			int key = animation->currentkeyFrameIndex;
+			//lerp position
+			FVector deltaLocation = (*pose2[key + 1]->location - *pose1[key]->location)
+				* animation->keyFrames[key]->deltaKeyframe
+				+ *pose1[key]->location;
 
-		//lerp scale
-		float deltaScale = (pose2[key + 1]->scale - pose1[key]->scale)
-			* animation->keyFrames[animation->currentkeyFrameIndex]->deltaKeyframe
-			+ pose1[key]->scale;
+			deltaLocation += h.basePose[i].GetLocation() - deltaLocation;
 
-		//lerp rotation 
-		FVector deltaRot =
-			(*pose2[key + 1]->rotaion - *pose1[key]->rotaion)
-			* animation->keyFrames[animation->currentkeyFrameIndex]->deltaKeyframe
-			+ *pose1[key]->rotaion;
+			//lerp scale
+			float deltaScale = (pose2[key + 1]->scale - pose1[key]->scale)
+				* animation->keyFrames[animation->currentkeyFrameIndex]->deltaKeyframe
+				+ pose1[key]->scale;
 
-		FRotator DeltaRotator(deltaRot.X, deltaRot.Y, deltaRot.Z);
+			//lerp rotation 
+			FVector deltaRot =
+				(*pose2[key + 1]->rotaion - *pose1[key]->rotaion)
+				* animation->keyFrames[animation->currentkeyFrameIndex]->deltaKeyframe
+				+ *pose1[key]->rotaion;
 
-		FQuat DeltaRotationQuat = DeltaRotator.Quaternion();
+			FRotator DeltaRotator(deltaRot.X, deltaRot.Y, deltaRot.Z);
 
-		FQuat testquat = DeltaRotationQuat * h.basePose[i].GetRotation();
+			FQuat DeltaRotationQuat = DeltaRotator.Quaternion();
 
-		FTransform animPose;
-		animPose.SetLocation(deltaLocation);
-		animPose.SetRotation(testquat);
-		animPose.SetScale3D(FVector(deltaScale));
+			FQuat testquat = DeltaRotationQuat * h.basePose[i].GetRotation();
 
-		/*int baseBoneIndex = mesh->SkeletalMesh->RefSkeleton.FindBoneIndex((FName)animBonesNames[i]);
-		if (baseBoneIndex != -1)
-		{
-			FTransform refBoneBaseTransform = mesh->SkeletalMesh->RefSkeleton.GetRefBonePose()[baseBoneIndex];
-			animPose.SetLocation(animPose.GetLocation() - refBoneBaseTransform.GetLocation());
-			animPose.SetRotation(animPose.GetRotation() * refBoneBaseTransform.GetRotation());
+			FTransform animPose;
+			animPose.SetLocation(deltaLocation);
+			animPose.SetRotation(testquat);
 			animPose.SetScale3D(FVector(deltaScale));
-		}*/
 
-		FName parentName = h.FindBoneByName(names[i])->GetParentName(); //gets the parent bone from the heriarchy
-		//FName parentName = mesh->GetParentBone((FName)animationController->bonesNames->GetData()[i]);
-		if (parentName == NAME_None)
-		{
-			ForwardKinematics::SolveRootFK(mesh, animPose, names[i]);
+			/*int baseBoneIndex = mesh->SkeletalMesh->RefSkeleton.FindBoneIndex((FName)animBonesNames[i]);
+			if (baseBoneIndex != -1)
+			{
+				FTransform refBoneBaseTransform = mesh->SkeletalMesh->RefSkeleton.GetRefBonePose()[baseBoneIndex];
+				animPose.SetLocation(animPose.GetLocation() - refBoneBaseTransform.GetLocation());
+				animPose.SetRotation(animPose.GetRotation() * refBoneBaseTransform.GetRotation());
+				animPose.SetScale3D(FVector(deltaScale));
+			}*/
+
+			FName parentName = h.FindBoneByName(names[i])->GetParentName(); //gets the parent bone from the heriarchy
+			//FName parentName = mesh->GetParentBone((FName)animationController->bonesNames->GetData()[i]);
+			if (parentName == NAME_None)
+			{
+				ForwardKinematics::SolveRootFK(mesh, animPose, names[i]);
+			}
+			else
+			{
+				ForwardKinematics::SolveSingleFK(mesh, animPose, names[i], parentName);
+			}
 		}
-		else
-		{
-			ForwardKinematics::SolveSingleFK(mesh, animPose, names[i], parentName);
-		}
+		
 	}
 
 	return 1;

@@ -146,6 +146,7 @@ void ClipController::InitAnimationController(FString animationName, float timeBe
 		return;
 	}
 
+
 	AnimationDataController* controller = animationMap[animationName];
 
 	//get the count of samples
