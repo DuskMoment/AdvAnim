@@ -19,7 +19,7 @@ ATheBoss::ATheBoss() : AActor()
 	controller = new ClipController();
 	controller->GetAssetData(mesh, skelMeshComp);
 	controller->InitAnimationController("basePose", 0.2);
-	controller->InitAnimationController("ymca", 0.2);
+	controller->InitAnimationController("idle_m", 0.2);
 
 }
 
@@ -127,9 +127,9 @@ void ATheBoss::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	controller->UpdateClipController(DeltaTime, &controller->GetAnimationControllerByAnimationName("ymca")->playBackData, mesh);
+	controller->UpdateClipController(DeltaTime, &controller->GetAnimationControllerByAnimationName("idle_m")->playBackData, mesh);
 
-	ClipController::AnimationDataController* animationController = controller->GetAnimationControllerByAnimationName("ymca");
+	ClipController::AnimationDataController* animationController = controller->GetAnimationControllerByAnimationName("idle_m");
 
 	//LERP
 
