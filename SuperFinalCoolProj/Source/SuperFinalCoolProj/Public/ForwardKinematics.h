@@ -16,7 +16,7 @@ public:
 	ForwardKinematics() = delete;
 	~ForwardKinematics() = delete;
 
-	static int UpdateFK(UModifiedPoseableMeshComponent* mesh, ClipController::AnimationDataController* animationController, Heirarchy& h);
+	static int UpdateFK(UModifiedPoseableMeshComponent* mesh, ClipController::AnimationDataController* animationController, ClipController::AnimationDataController* baseAnimationController, Heirarchy& h);
 	static int SolvePartialFK(UPoseableMeshComponent* mesh, ClipController::AnimationDataController* animationController, Heirarchy& h);
 	static int SolveRootFK(UPoseableMeshComponent* mesh, FTransform& animPose, FName name);
 	static int SolveSingleFK(UPoseableMeshComponent* mesh, FTransform& animPose, FName name, FName parentName);

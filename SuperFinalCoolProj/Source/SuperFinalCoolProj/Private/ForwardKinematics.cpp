@@ -4,7 +4,7 @@
 #include "ForwardKinematics.h"
 #include "ClipController.h"
 
-int ForwardKinematics::UpdateFK(UModifiedPoseableMeshComponent* mesh, ClipController::AnimationDataController* animationController, Heirarchy& h)
+int ForwardKinematics::UpdateFK(UModifiedPoseableMeshComponent* mesh, ClipController::AnimationDataController* animationController, ClipController::AnimationDataController* baseAnimationController, Heirarchy& h)
 {
 	ClipController::AnimationPlayBackData* animation = &animationController->playBackData;
 
@@ -36,58 +36,79 @@ int ForwardKinematics::UpdateFK(UModifiedPoseableMeshComponent* mesh, ClipContro
 		{
 			//get the data at that bone
 			ClipController::AnimationData** pose1 = animationController->data[names[i].ToString()]->GetData();
+			ClipController::AnimationData** poseBase = baseAnimationController->data[names[i].ToString()]->GetData();
 
 			//just use the first key frame for now
-			int key = 30;
+			int key = 0;
 
 			//get pose location
 			FVector deltaLocation = *pose1[key]->location;
+			FVector baseAnimLocation = *poseBase[0]->location;
 
-			deltaLocation += h.basePose[i].GetLocation() - deltaLocation;
+			deltaLocation = h.basePose[i].GetTranslation() + (deltaLocation - baseAnimLocation);
 
 			//get pose scale
 			float deltaScale = pose1[key]->scale;
 
 			//get pose rotation in degrees
 			FVector deltaRot = *pose1[key]->rotaion;
+			FVector baseAnimRot = *poseBase[0]->rotaion;
 
-			FRotator DeltaRotator(deltaRot.X, deltaRot.Y, deltaRot.Z);
+			//FRotator DeltaRotator(h.basePose[i].GetRotation().Euler().X + deltaRot.X - baseAnimRot.X, h.basePose[i].GetRotation().Euler().Y + deltaRot.Y - baseAnimRot.Y, h.basePose[i].GetRotation().Euler().Z + deltaRot.Z - baseAnimRot.Z);
+
+			FRotator DeltaRotator(deltaRot.X - baseAnimRot.X, deltaRot.Y - baseAnimRot.Y, deltaRot.Z - baseAnimRot.Z);
 
 			FQuat DeltaRotationQuat = DeltaRotator.Quaternion();
 
 			FQuat testquat = DeltaRotationQuat * h.basePose[i].GetRotation();
 
+			//FName parentName = h.FindBoneByName(names[i])->GetParentName(); //gets the parent bone from the heriarchy
+
+			////VQTranslation = (  ( T(A).X - T(B).X ),  ( T(A).Y - T(B).Y ), ( T(A).Z - T(B).Z), 0.f );
+			//deltaLocation = deltaLocation - ParentTransform.Translation;
+
+			//// Inverse RotatedTranslation
+			//TransformVectorRegister VInverseParentRot = VectorQuaternionInverse(ParentTransform.Rotation);
+			//TransformVectorRegister VR = VectorQuaternionRotateVector(VInverseParentRot, VQTranslation);
+
+			//// Translation = 1/S(B)
+			//Translation = VectorMultiply(VR, VSafeScale3D);
+
+			//// Rotation = Q(B)(-1) * Q(A)	
+			//Rotation = VectorQuaternionMultiply2(VInverseParentRot, Rotation);
+
 			FTransform animPose;
 
 			animPose.SetLocation(deltaLocation);
 			animPose.SetRotation(testquat);
-			animPose.SetScale3D(mesh->GetBoneSpaceTransforms()[i].GetScale3D());
+			animPose.SetScale3D(h.basePose[i].GetScale3D());
 
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red,
-				FString::Printf(TEXT("animPose x:%s %f y:%f z:%f"), *names[i].ToString(), animPose.GetLocation().X, animPose.GetLocation().Y, animPose.GetLocation().Z));
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green,
-				FString::Printf(TEXT("basePose x:%s %f y:%f z:%f"), *names[i].ToString(), h.basePose[i].GetLocation().X, h.basePose[i].GetLocation().Y, h.basePose[i].GetLocation().Z));
+				FString::Printf(TEXT("animPose x:%s %f y:%f z:%f"), *names[i].ToString(), deltaLocation.X, deltaLocation.Y, deltaLocation.Z));
+			/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green,
+				FString::Printf(TEXT("basePose x:%s %f y:%f z:%f"), *names[i].ToString(), baseAnimLocation.X, baseAnimLocation.Y, baseAnimLocation.Z));*/
 
 			//update the mesh
 			mesh->SetBoneSpaceTranformByName(animPose, (FName)names[i]); //the HTR has a lleft and right eye which is causing the it to crash
+			//mesh->SetBoneTransformByName(names[i], animPose, EBoneSpaces::ComponentSpace);
 
 			//else do nothing with it its not real
 
-			//FName parentName = h.FindBoneByName(names[i])->GetParentName(); //gets the parent bone from the heriarchy
-			////FName parentName = mesh->GetParentBone((FName)animationController->bonesNames->GetData()[i]);
-			//if (parentName == NAME_None)
-			//{
-			//	ForwardKinematics::SolveRootFK(mesh, animPose, names[i]);
-			//}
-			//else
-			//{
-			//	ForwardKinematics::SolveSingleFK(mesh, animPose, names[i], parentName);
-			//}
+			FName parentName = h.FindBoneByName(names[i])->GetParentName(); //gets the parent bone from the heriarchy
+			//FName parentName = mesh->GetParentBone((FName)animationController->bonesNames->GetData()[i]);
+			/*if (parentName == NAME_None)
+			{
+				ForwardKinematics::SolveRootFK(mesh, animPose, names[i]);
+			}
+			else
+			{
+				ForwardKinematics::SolveSingleFK(mesh, animPose, names[i], parentName);
+			}*/
 		}
 	}
 
 	//mesh->bDisplayBones = true;
-	mesh->RefreshBoneTransforms();
+	//mesh->RefreshBoneTransforms();
 	//ForwardKinematics::SolvePartialFK(mesh, animationController, h);
 
 

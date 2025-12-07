@@ -131,11 +131,16 @@ void ATheBoss::Tick(float DeltaTime)
 
 	ClipController::AnimationDataController* animationController = controller->GetAnimationControllerByAnimationName("ymca");
 
+	controller->UpdateClipController(DeltaTime, &controller->GetAnimationControllerByAnimationName("basePose")->playBackData, mesh);
+
+	ClipController::AnimationDataController* baaeAnimationController = controller->GetAnimationControllerByAnimationName("basePose");
+
 	//LERP
 
-
+	controller->InitAnimationController("basePose", 0.2);
+	controller->InitAnimationController("ymca", 0.2);
 	
-	ForwardKinematics::UpdateFK(mesh, animationController, *pH);
+	ForwardKinematics::UpdateFK(mesh, animationController, baaeAnimationController, *pH);
 	
 
 	
