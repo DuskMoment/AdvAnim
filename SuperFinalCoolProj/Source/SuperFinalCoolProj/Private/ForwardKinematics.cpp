@@ -9,13 +9,16 @@ int ForwardKinematics::UpdateFK(UModifiedPoseableMeshComponent* mesh, ClipContro
 
 
 	ClipController::AnimationPlayBackData* animation = &animationController->playBackData;
-	
+
 	//these meshes are not the same?
+	TArray<FName> names;
+	mesh->GetBoneNames(names);
+
 	FString* animBonesNames = animationController->bonesNames->GetData();
 	int numberOfNames = animationController->bonesNames->Num();
 
 	UE_LOG(LogTemp, Warning, TEXT("numberOfNames %i"), numberOfNames);
-	
+
 	for (int i = 0; i < numberOfNames; i++)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("numberOfNames %s"), *animBonesNames[i]);
@@ -23,59 +26,62 @@ int ForwardKinematics::UpdateFK(UModifiedPoseableMeshComponent* mesh, ClipContro
 
 	UE_LOG(LogTemp, Warning, TEXT("numberOfBaseBoneNames %i"), h.basePose.Num());
 
-	int interalUnrealBoneCounter = 0;
-
-	for (int i = 0; i < numberOfNames; i++)
+	for (int i = 0; i < names.Num(); i++)
 	{
-		//get the data at that bone
-		ClipController::AnimationData** pose1 = animationController->data[animBonesNames[i]]->GetData();
-
-		//just use the first key frame for now
-		int key = 0;
-
-		//get pose location
-		FVector deltaLocation = *pose1[key]->location;
-
-		deltaLocation += h.basePose[interalUnrealBoneCounter].GetLocation();
-
-		//get pose scale
-		float deltaScale = pose1[key]->scale;
-
-		//get pose rotation in degrees
-		FVector deltaRot = *pose1[key]->rotaion;
-
-		FRotator DeltaRotator(deltaRot.X, deltaRot.Y, deltaRot.Z);
-
-		FQuat DeltaRotationQuat = DeltaRotator.Quaternion();
-
-		FQuat testquat = DeltaRotationQuat * h.basePose[interalUnrealBoneCounter].GetRotation();
-
-		deltaRot.X = h.basePose[interalUnrealBoneCounter].GetRotation().X;
-		deltaRot.Y = h.basePose[interalUnrealBoneCounter].GetRotation().Y;
-		deltaRot.Z = h.basePose[interalUnrealBoneCounter].GetRotation().Z;
-
-		FTransform animPose;
-
-		animPose.SetLocation(mesh->GetBoneSpaceTransforms()[interalUnrealBoneCounter].GetLocation());
-		//animPose.SetRotation(h.testBase.GetRotation());
-		//animPose.SetRotation(deltaRot.Rotation().Quaternion());
-		animPose.SetRotation(mesh->GetBoneSpaceTransforms()[interalUnrealBoneCounter].GetRotation());
-		animPose.SetScale3D(mesh->GetBoneSpaceTransforms()[interalUnrealBoneCounter].GetScale3D());
-
-
-		TArray<FName> unrealBoneNames;
-		mesh->GetBoneNames(unrealBoneNames);
-
-		//if the bone name exists in the list of unreal names
-		if (unrealBoneNames.Contains((FName)animBonesNames[i]))
+		if (mesh->GetBoneIndex((FName)names[i]) != -1)
 		{
+			//get the data at that bone
+			ClipController::AnimationData** pose1 = animationController->data[names[i].ToString()]->GetData();
+
+			//just use the first key frame for now
+			int key = 0;
+
+			//get pose location
+			FVector deltaLocation = *pose1[key]->location;
+
+			//deltaLocation += h.basePose[i].GetLocation();
+
+			//get pose scale
+			float deltaScale = pose1[key]->scale;
+
+			//get pose rotation in degrees
+			FVector deltaRot = *pose1[key]->rotaion;
+
+			FRotator DeltaRotator(deltaRot.X, deltaRot.Y, deltaRot.Z);
+
+			FQuat DeltaRotationQuat = DeltaRotator.Quaternion();
+
+			FQuat testquat = DeltaRotationQuat * h.basePose[i].GetRotation();
+
+			deltaRot.X = h.basePose[i].GetRotation().X;
+			deltaRot.Y = h.basePose[i].GetRotation().Y;
+			deltaRot.Z = h.basePose[i].GetRotation().Z;
+
+			FTransform animPose;
+
+			animPose.SetLocation(deltaLocation);
+			//animPose.SetRotation(h.testBase.GetRotation());
+			//animPose.SetRotation(deltaRot.Rotation().Quaternion());
+			animPose.SetRotation(testquat);
+			animPose.SetScale3D(mesh->GetBoneSpaceTransforms()[i].GetScale3D());
+
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red,
+				FString::Printf(TEXT("animPose x:%s %f y:%f z:%f"), *animBonesNames[i], animPose.GetLocation().X, animPose.GetLocation().Y, animPose.GetLocation().Z));
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green,
+				FString::Printf(TEXT("basePose x:%s %f y:%f z:%f"), *animBonesNames[i], h.basePose[i].GetLocation().X, h.basePose[i].GetLocation().Y, h.basePose[i].GetLocation().Z));
+
+
+
+			TArray<FName> unrealBoneNames;
+			mesh->GetBoneNames(unrealBoneNames);
+
 			//update the mesh
-			mesh->SetBoneSpaceTranformByName(animPose, (FName)animBonesNames[i]); //the HTR has a lleft and right eye which is causing the it to crash
+			mesh->SetBoneSpaceTranformByName(animPose, (FName)names[i]); //the HTR has a lleft and right eye which is causing the it to crash
 			//mesh->SetBoneSpaceTranformByName(animOis)
-			interalUnrealBoneCounter++;
+
+			//else do nothing with it its not real
+
 		}
-		//else do nothing with it its not real
-		
 	}
 
 	mesh->bDisplayBones = true;
@@ -154,7 +160,7 @@ int ForwardKinematics::SolveRootFK(UPoseableMeshComponent* mesh, FTransform& ani
 	FCompactPoseBoneIndex boneIndex = FCompactPoseBoneIndex(mesh->GetBoneIndex(name));
 	mesh->SetBoneTransformByName(name, animPose, EBoneSpaces::ComponentSpace);
 
-	
+
 	//if (GEngine)
 	//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, 
 	//		FString::Printf(TEXT("animPose x:%f y:%f z:%f"), animPose.GetLocation().X, animPose.GetLocation().Y, animPose.GetLocation().Z));

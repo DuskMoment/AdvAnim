@@ -433,9 +433,9 @@ BoneDataNode* ClipController::GetAssetData(UPoseableMeshComponent* mesh, USkelet
 					array[i].ParseIntoArray(splitData, TEXT("\t"), true);
 
 					insertData->location = new FVector(
-						FCString::Atod(*splitData[1]) * 0.2,
-						FCString::Atod(*splitData[3]) * 0.2,
-						FCString::Atod(*splitData[2]) * 0.2 ); // swapped y and z because unreal * 0.1
+						FCString::Atod(*splitData[1]) * 0.1,
+						FCString::Atod(*splitData[3]) * 0.1,
+						FCString::Atod(*splitData[2]) * 0.1 ); // swapped y and z because unreal * 0.1
 
 					insertData->rotaion = new FVector(
 						FCString::Atod(*splitData[5]),
