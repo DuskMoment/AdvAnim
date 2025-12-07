@@ -27,7 +27,7 @@ int ForwardKinematics::UpdateFK(UModifiedPoseableMeshComponent* mesh, ClipContro
 
 	ClipController::AnimationData** testPoseList = animationController->data["Spine"]->GetData();
 
-	ClipController::AnimationData* testPose = testPoseList[1];
+	ClipController::AnimationData* testPose = testPoseList[0];
 
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red,
 		FString::Printf(TEXT("animPose x: %f y:%f z:%f"), testPose->location->X, testPose->location->Y, testPose->location->Z));
