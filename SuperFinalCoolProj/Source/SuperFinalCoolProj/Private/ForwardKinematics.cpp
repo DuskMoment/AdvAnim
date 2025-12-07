@@ -6,8 +6,6 @@
 
 int ForwardKinematics::UpdateFK(UModifiedPoseableMeshComponent* mesh, ClipController::AnimationDataController* animationController, Heirarchy& h)
 {
-
-
 	ClipController::AnimationPlayBackData* animation = &animationController->playBackData;
 
 	//these meshes are not the same?
@@ -25,6 +23,17 @@ int ForwardKinematics::UpdateFK(UModifiedPoseableMeshComponent* mesh, ClipContro
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("numberOfBaseBoneNames %i"), h.basePose.Num());
+
+
+	ClipController::AnimationData** testPoseList = animationController->data["Spine"]->GetData();
+
+	ClipController::AnimationData* testPose = testPoseList[1];
+
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red,
+		FString::Printf(TEXT("animPose x: %f y:%f z:%f"), testPose->location->X, testPose->location->Y, testPose->location->Z));
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green,
+		FString::Printf(TEXT("basePose x: %f y:%f z:%f"), h.basePose[1].GetLocation().X, h.basePose[1].GetLocation().Y, h.basePose[1].GetLocation().Z));
+
 
 	for (int i = 0; i < names.Num(); i++)
 	{
@@ -65,11 +74,10 @@ int ForwardKinematics::UpdateFK(UModifiedPoseableMeshComponent* mesh, ClipContro
 			animPose.SetRotation(testquat);
 			animPose.SetScale3D(mesh->GetBoneSpaceTransforms()[i].GetScale3D());
 
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red,
+			/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red,
 				FString::Printf(TEXT("animPose x:%s %f y:%f z:%f"), *animBonesNames[i], animPose.GetLocation().X, animPose.GetLocation().Y, animPose.GetLocation().Z));
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green,
-				FString::Printf(TEXT("basePose x:%s %f y:%f z:%f"), *animBonesNames[i], h.basePose[i].GetLocation().X, h.basePose[i].GetLocation().Y, h.basePose[i].GetLocation().Z));
-
+				FString::Printf(TEXT("basePose x:%s %f y:%f z:%f"), *animBonesNames[i], h.basePose[i].GetLocation().X, h.basePose[i].GetLocation().Y, h.basePose[i].GetLocation().Z));*/
 
 
 			TArray<FName> unrealBoneNames;

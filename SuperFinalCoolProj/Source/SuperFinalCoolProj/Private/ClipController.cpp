@@ -407,7 +407,11 @@ BoneDataNode* ClipController::GetAssetData(UPoseableMeshComponent* mesh, USkelet
 
 
 				AnimationDataController* controller = animationMap[key];
-				controller->bonesNames->Add(array[i]);
+
+				if(!controller->bonesNames->Contains(array[i]))
+				{
+					controller->bonesNames->Add(array[i]);
+				}
 
 				FString name = array[i];
 
@@ -433,9 +437,24 @@ BoneDataNode* ClipController::GetAssetData(UPoseableMeshComponent* mesh, USkelet
 					array[i].ParseIntoArray(splitData, TEXT("\t"), true);
 
 					insertData->location = new FVector(
-						FCString::Atod(*splitData[1]) * 0.1,
-						FCString::Atod(*splitData[3]) * 0.1,
-						FCString::Atod(*splitData[2]) * 0.1 ); // swapped y and z because unreal * 0.1
+						FCString::Atod(*splitData[1]),
+						FCString::Atod(*splitData[3]),
+						FCString::Atod(*splitData[2])
+						); // swapped y and z because unreal * 0.1
+
+					//insertData->location->X = insertData->location->X * 0.1;
+					//insertData->location->Y;
+					//insertData->location->Z;
+
+					//*insertData->location = *insertData->location * 0.1;
+
+					float x = insertData->location->X * 0.1;
+					float y = insertData->location->Y * 0.1;
+					float z = insertData->location->Z * 0.1;
+
+					insertData->location->X = x;
+					insertData->location->Y = y;
+					insertData->location->Z = z;
 
 					insertData->rotaion = new FVector(
 						FCString::Atod(*splitData[5]),
@@ -446,9 +465,6 @@ BoneDataNode* ClipController::GetAssetData(UPoseableMeshComponent* mesh, USkelet
 
 					list->Add(insertData);
 					
-
-
-
 
 					UE_LOG(LogTemp, Warning, TEXT("TempStore: %s"), *tempStore);
 					i++;
