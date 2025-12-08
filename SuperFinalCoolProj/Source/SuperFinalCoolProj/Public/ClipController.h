@@ -17,7 +17,7 @@ public:
 	~ClipController();
 
 	void UpdateClipController(float dt, UModifiedPoseableMeshComponent* mesh, USkeletalMeshComponent* skelMeshComp, FTransform lookAtEffector);
-
+	void GetCurvesFromUAsset(USkeletalMeshComponent* skelMeshComp, FString animName);
 	BoneDataNode* GetAssetData();
 
 	UAnimSequence* currClip;
@@ -26,6 +26,8 @@ public:
 
 	struct AnimationData
 	{
+		FTransform transform;
+
 		FVector* location;
 		FVector* rotaion;
 		float scale;

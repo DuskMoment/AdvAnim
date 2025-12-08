@@ -1,10 +1,23 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
+#pragma once
 #include "ClipController.h"
 #include "EditorFramework/AssetImportData.h"
+#include "Animation/AnimSequence.h"
+#include "Animation/AnimCurveTypes.h"
 #include "ForwardKinematics.h"
 #include "InverseKinematics.h"
+#include "Animation/AnimSequence.h"
+#include "Animation/PoseSnapshot.h"
+#include "Animation/AnimInstance.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Engine/SkeletalMesh.h"
+#include "Animation/AnimSequence.h"
+#include "Animation/PoseSnapshot.h"
+#include "Animation/AnimationPoseData.h"
+#include "Animation/AnimTypes.h"
+#include "Components/SkeletalMeshComponent.h"
+
 
 
 ClipController::ClipController()
@@ -13,10 +26,79 @@ ClipController::ClipController()
 
 ClipController::~ClipController()
 {
+}	
+
+void ClipController::GetCurvesFromUAsset(USkeletalMeshComponent* skelMeshComp, FString animName)
+{
+	FMemMark Mark(FMemStack::Get());
+	if (!animationMap.Contains(animName))
+	{
+		animationMap.Add(animName, new AnimationDataController());
+	}
+
+	AnimationDataController* controller = animationMap[animName];
+
+	FBoneContainer BoneContainer = skelMeshComp->GetAnimInstance()->GetRequiredBones();
+	BoneContainer.SetUseSourceData(true);
+
+	float sequenceLenght = currClip->GetPlayLength();
+	float frameRate = currClip->GetSamplingFrameRate().AsDecimal();
+	const int32 numFrames = currClip->GetNumberOfSampledKeys();
+	
+	for (int32 i = 0; i < numFrames ; ++i)
+	{
+		const float CurrentTime = i * (1.0f / frameRate);
+
+		FCompactPose OutPose;
+		FBlendedCurve OutCurve;
+		FStackCustomAttributes OutAttributes;
+
+		// Initialize OutPose with the bone container
+		OutPose.SetBoneContainer(&BoneContainer);
+
+		FAnimationPoseData AnimationPoseData(OutPose, OutCurve, OutAttributes);
+		FAnimExtractContext ExtractionContext(CurrentTime, false); // false for not looping
+
+		// Get the animation pose at the specific time bones in aprent space
+		currClip->GetAnimationPose(AnimationPoseData, ExtractionContext);
+
+		// Retrieve the bone transforms as a TArray<FTransform> (local/component space)
+		//const TArray<FTransform> BoneTransforms = OutPose.GetBones();
+
+		for (int j = 0; j < OutPose.GetBones().Num(); j++)
+		{
+			FTransform pose = OutPose.GetBones()[j];
+			FString boneName = BoneContainer.GetReferenceSkeleton().GetBoneName(j).ToString();
+			
+			//not int he list of bone names
+			if (!controller->bonesNames->Contains((FName)boneName))
+			{
+				controller->bonesNames->Add(boneName);
+			}
+
+			//not in the controller
+			if (!controller->data.Contains(boneName))
+			{
+				controller->data.Add(boneName, new TArray<AnimationData*>());
+			}
+
+			//add new anim data
+			AnimationData* animData = new AnimationData();
+			animData->transform = pose;
+			controller->data[boneName]->Add(animData);
+
+
+		}
+
+	}
+
+
 }
 
 void ClipController::UpdateClipController(float dt, UModifiedPoseableMeshComponent* mesh, USkeletalMeshComponent* skelMeshComp, FTransform lookAtEffector)
 {
+
+
 	currClipTime += dt * currClip->RateScale; //Add reverse playback here too
 
 	if (currClipTime > currClip->GetPlayLength()) 

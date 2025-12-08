@@ -16,8 +16,8 @@ ATheBoss::ATheBoss() : AActor()
 
 	//skelMeshComp->SetAnimation(animClip);
 	controller = new ClipController();
-	blendTree = new BlendTree();
 	controller->GetAssetData();
+
 }
 
 // Called when the game starts or when spawned
@@ -40,6 +40,8 @@ void ATheBoss::BeginPlay()
 	skelMeshComp->SetSkeletalMesh(skelMesh, true);
 
 	mesh->CopyPoseFromSkeletalComponent(skelMeshComp);
+
+
 	
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Black, FString::Printf(TEXT("Atempting to init")));
@@ -62,8 +64,6 @@ void ATheBoss::BeginPlay()
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString::Printf(TEXT("HAS INSTANCE")));
 	}
-
-	blendTree->CreateTree(mesh);
 
 	mesh->GetBoneNames(names);
 	mesh->bDisplayBones = true;
@@ -90,12 +90,7 @@ void ATheBoss::BeginPlay()
 			animClip->GetPlayLength();
 			animClip->GetAnimationPose(*t, FAnimExtractContext());*/
 
-		if (blendSkel1 && blendSkel2) {
-			FTransform* out = mesh->GetBoneSpaceTranformRefByName(names[i]);
-			FTransform* in1 = blendSkel1->mesh->GetBoneSpaceTranformRefByName(names[i]);
-			FTransform* in2 = blendSkel2->mesh->GetBoneSpaceTranformRefByName(names[i]);
-			blendTree->ConfigureNode(names[i], out, in1, in2, BlendTree::LERP);
-		}
+
 	}
 
 	pH = new Heirarchy(&data);
@@ -106,6 +101,8 @@ void ATheBoss::BeginPlay()
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Heirarchy Populated %s"), *data[0].GetBoneName().ToString()));
 	}
 
+	controller->GetCurvesFromUAsset(skelMeshComp, "cap");
+
 }
 	
 
@@ -115,10 +112,6 @@ void ATheBoss::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	controller->UpdateClipController(DeltaTime, mesh, skelMeshComp, lookAtEffector->GetActorTransform());
-
-	if (blendSkel1 && blendSkel2) {
-		blendTree->Execute(0.5);
-	}
 
 	//RightUpLeg
 	BoneDataNode* node = pH->FindBoneByName("RightUpLeg");
