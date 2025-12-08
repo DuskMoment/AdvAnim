@@ -16,4 +16,5 @@ class SUPERFINALCOOLPROJ_API UModifiedPoseableMeshComponent : public UPoseableMe
 	
 public:
 	void SetBoneSpaceTranformByName(FTransform transform, FName name);
+	FTransform* GetBoneSpaceTranformRefByName(FName name);
 };

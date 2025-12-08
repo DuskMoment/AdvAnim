@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "BoneDataNode.h"
 #include "Heirarchy.h"
+#include "BlendTree.h"
 #include "GameFramework/Actor.h"
 #include "TheBoss.generated.h"
 
@@ -51,8 +52,16 @@ public:
 
 	ClipController* controller;
 
+	BlendTree* blendTree;
+
 	UPROPERTY(EditAnywhere)
 	UClass* animInst;
+
+	UPROPERTY(EditAnywhere)
+	ATheBoss* blendSkel1;
+
+	UPROPERTY(EditAnywhere)
+	ATheBoss* blendSkel2;
 
 
 private:
