@@ -42,6 +42,7 @@ void ClipController::UpdateClipController(float dt, UModifiedPoseableMeshCompone
 
 	ForwardKinematics::UpdateFK(mesh, OutPose);
 	InverseKinematics::UpdateEffectors(mesh, lookAtEffector);
+	//ForwardKinematics::UpdateFK(mesh, OutPose);
 }
 
 BoneDataNode* ClipController::GetAssetData()

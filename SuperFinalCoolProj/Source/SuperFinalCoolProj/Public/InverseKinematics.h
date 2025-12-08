@@ -19,7 +19,7 @@ public:
 	static int UpdateFullIK(UModifiedPoseableMeshComponent* mesh, FCompactPose& animPoses);
 	static int SolvePartialIK(UModifiedPoseableMeshComponent* mesh, FCompactPose& animPoses);
 	static int SolveRootIK(UModifiedPoseableMeshComponent* mesh, FCompactPose& animPoses, FName name);
-	static int SolveSingleIK(UModifiedPoseableMeshComponent* mesh, FCompactPose& animPoses, FName name, FName parentName);
+	static int SolveSingleIK(UModifiedPoseableMeshComponent* mesh, FName name, FName parentName);
 
 private:
 	static void ResolvePostEffectorIK(UModifiedPoseableMeshComponent* mesh, FTransform jToObj, FName name);
