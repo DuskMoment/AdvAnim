@@ -46,6 +46,9 @@ public:
 	UAnimSequence* animClip;
 	//UAnimationCont* animation;
 
+	UPROPERTY(EditAnywhere)
+	AActor* lookAtEffector;
+
 	ClipController* controller;
 
 	UPROPERTY(EditAnywhere)

@@ -45,47 +45,75 @@ int InverseKinematics::SolveSingleIK(UModifiedPoseableMeshComponent* mesh, FComp
 	return 1;
 }
 
-int InverseKinematics::UpdateEffectors(UModifiedPoseableMeshComponent* mesh)
+int InverseKinematics::UpdateEffectors(UModifiedPoseableMeshComponent* mesh, FTransform effectorT)
 {
-	InverseKinematics::UpdateLookAt(mesh);
+	InverseKinematics::UpdateLookAt(mesh, effectorT);
 	return 1;
 }
 
 void InverseKinematics::ResolvePostEffectorIK(UModifiedPoseableMeshComponent* mesh, FTransform jToObj, FName name)
 {
-	mesh->SetBoneRotationByName(name, jToObj.GetRotation().Rotator(), EBoneSpaces::WorldSpace);
+	mesh->SetBoneRotationByName(name, jToObj.Rotator(), EBoneSpaces::WorldSpace);
 }
 
-void InverseKinematics::UpdateLookAt(UModifiedPoseableMeshComponent* mesh)
+void InverseKinematics::UpdateLookAt(UModifiedPoseableMeshComponent* mesh, FTransform effectorT)
 {
 	FName name("Neck");
 	FTransform jToObj = mesh->GetBoneTransformByName(name, EBoneSpaces::WorldSpace);
+	FTransform compBone = mesh->GetBoneTransformByName(name, EBoneSpaces::ComponentSpace);
+	FTransform localBone = mesh->SkeletalMesh->RefSkeleton.GetRefBonePose()[mesh->GetBoneIndex(name)];
 
 	//Hardcoded effector world position for now
-	FVector effectorInWorld = FVector(-600.000000, 6660.000000, 90.000000);
+	FVector effectorInWorld = effectorT.GetLocation();
 
 	//Making the look at basis
-	FVector fwd = effectorInWorld - mesh->GetBoneTransformByName(name, EBoneSpaces::WorldSpace).GetLocation();
+	FVector fwd = effectorInWorld - jToObj.GetLocation();
 	fwd.Normalize();
 
-	FVector right = FVector::CrossProduct(FVector::UpVector, fwd);
+	FVector right = FVector::CrossProduct(fwd, FVector::UpVector);
 	right.Normalize();
 
-	FVector up = FVector::CrossProduct(right, fwd);
+	FVector up = FVector::CrossProduct(fwd, right);
 	up.Normalize();
 
-	FMatrix lookAt_Basis;
+	FMatrix lookAt_Basis(FPlane(right.X, right.Y, right.Z, 0.0),
+		FPlane(up.X, up.Y, up.Z, 0.0),
+		FPlane(fwd.X, fwd.Y, fwd.Z, 0.0),
+		FPlane(0.0, 0.0, 0.0, 1.0)
+	);
+
+	/*FMatrix lookAt_Basis;
 	lookAt_Basis.SetColumn(0, right);
 	lookAt_Basis.SetColumn(1, fwd);
-	lookAt_Basis.SetColumn(2, up);
+	lookAt_Basis.SetColumn(2, up);*/
 
 	//jToObj.SetRotation(fwd.Rotation().Quaternion());
 
 	//Get the affected joint basis and get it's transpose (transpose is inverse for orthonormal basis)
-	FMatrix basisT = mesh->GetBoneTransformByName(name, EBoneSpaces::WorldSpace).GetRotation().ToMatrix().GetTransposed();
+	FVector jRight = compBone.GetRotation().GetRightVector();
+	FVector jFwd = compBone.GetRotation().GetForwardVector();
+	FVector jUp = compBone.GetRotation().GetUpVector();
+	jRight.Normalize();
+	jFwd.Normalize();
+	jUp.Normalize();
+
+	FMatrix basisT(FPlane(jFwd.X, jFwd.Y, jFwd.Z, 0.0),
+		FPlane(jRight.X, jRight.Y, jRight.Z, 0.0),
+		FPlane(jUp.X, jUp.Y, jUp.Z, 0.0),
+		FPlane(0.0, 0.0, 0.0, 1.0));
 
 	//Make look at basis relative to bone basis
-	jToObj.SetRotation((basisT * lookAt_Basis).ToQuat());
+	jToObj.SetRotation((lookAt_Basis).Rotator().Quaternion());
+
+	//Doing it this way with this look at basis has the head rotated to the right 90 degrees 
+	// and we don't know why 
+	// 	 
+	 /*lookAt_Basis = FMatrix(FPlane(fwd.X, fwd.Y, fwd.Z, 0.0),
+		FPlane(right.X, right.Y, right.Z, 0.0),
+		FPlane(up.X, up.Y, up.Z, 0.0),
+		FPlane(0.0, 0.0, 0.0, 1.0)
+	);
+	jToObj.SetRotation((basisT.GetTransposed() * lookAt_Basis).Rotator().Quaternion());*/
 
 	//Solve post IK 
 	InverseKinematics::ResolvePostEffectorIK(mesh, jToObj, name);

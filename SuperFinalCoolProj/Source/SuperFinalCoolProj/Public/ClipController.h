@@ -16,7 +16,7 @@ public:
 	ClipController();
 	~ClipController();
 
-	void UpdateClipController(float dt, UModifiedPoseableMeshComponent* mesh, USkeletalMeshComponent* skelMeshComp);
+	void UpdateClipController(float dt, UModifiedPoseableMeshComponent* mesh, USkeletalMeshComponent* skelMeshComp, FTransform lookAtEffector);
 
 	BoneDataNode* GetAssetData();
 

@@ -14,7 +14,7 @@ public:
 	InverseKinematics() = delete;;
 	~InverseKinematics() = delete;;
 
-	static int UpdateEffectors(UModifiedPoseableMeshComponent* mesh);
+	static int UpdateEffectors(UModifiedPoseableMeshComponent* mesh, FTransform effectorT);
 
 	static int UpdateFullIK(UModifiedPoseableMeshComponent* mesh, FCompactPose& animPoses);
 	static int SolvePartialIK(UModifiedPoseableMeshComponent* mesh, FCompactPose& animPoses);
@@ -23,5 +23,5 @@ public:
 
 private:
 	static void ResolvePostEffectorIK(UModifiedPoseableMeshComponent* mesh, FTransform jToObj, FName name);
-	static void UpdateLookAt(UModifiedPoseableMeshComponent* mesh);
+	static void UpdateLookAt(UModifiedPoseableMeshComponent* mesh, FTransform effectorT);
 };

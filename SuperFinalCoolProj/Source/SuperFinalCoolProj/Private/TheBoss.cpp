@@ -109,7 +109,7 @@ void ATheBoss::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	controller->UpdateClipController(DeltaTime, mesh, skelMeshComp);
+	controller->UpdateClipController(DeltaTime, mesh, skelMeshComp, lookAtEffector->GetActorTransform());
 
 	//RightUpLeg
 	BoneDataNode* node = pH->FindBoneByName("RightUpLeg");

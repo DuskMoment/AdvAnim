@@ -15,7 +15,7 @@ ClipController::~ClipController()
 {
 }
 
-void ClipController::UpdateClipController(float dt, UModifiedPoseableMeshComponent* mesh, USkeletalMeshComponent* skelMeshComp)
+void ClipController::UpdateClipController(float dt, UModifiedPoseableMeshComponent* mesh, USkeletalMeshComponent* skelMeshComp, FTransform lookAtEffector)
 {
 	currClipTime += dt * currClip->RateScale; //Add reverse playback here too
 
@@ -41,7 +41,7 @@ void ClipController::UpdateClipController(float dt, UModifiedPoseableMeshCompone
 	FCompactPose OutPose = poseData.GetPose();
 
 	ForwardKinematics::UpdateFK(mesh, OutPose);
-	InverseKinematics::UpdateEffectors(mesh);
+	InverseKinematics::UpdateEffectors(mesh, lookAtEffector);
 }
 
 BoneDataNode* ClipController::GetAssetData()
