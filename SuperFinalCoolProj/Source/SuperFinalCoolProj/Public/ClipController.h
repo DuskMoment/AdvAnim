@@ -12,12 +12,15 @@
  */
 class SUPERFINALCOOLPROJ_API ClipController
 {
+
 public:
 	ClipController();
 	~ClipController();
 
 	void UpdateClipController(float dt, UModifiedPoseableMeshComponent* mesh, USkeletalMeshComponent* skelMeshComp, FTransform lookAtEffector);
 	void GetCurvesFromUAsset(USkeletalMeshComponent* skelMeshComp, FString animName);
+	
+
 	BoneDataNode* GetAssetData();
 
 	UAnimSequence* currClip;
@@ -50,10 +53,34 @@ public:
 		}
 	};
 
+	struct KeyFrames
+	{
+		float startTime;
+		float endTime;
+		int curTime;
+		float keyFrameParam;
+
+	};
+
+	struct ClipKeyframes
+	{
+		float curTime;
+		float clipduration;
+		float clipPeram;
+		float speed;
+		int keyFrameIndex;
+
+
+		TArray<KeyFrames> frames;
+	};
+
+	void InitAnimationController(float playLenght, int keysASecond, AnimationDataController* cont);
 private:
 
 	UPROPERTY()
 	TMap<FString, AnimationDataController*> animationMap;
+	ClipKeyframes keyFrames;
+
 	
 
 };

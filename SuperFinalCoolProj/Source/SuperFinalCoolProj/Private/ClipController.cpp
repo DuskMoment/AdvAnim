@@ -92,20 +92,116 @@ void ClipController::GetCurvesFromUAsset(USkeletalMeshComponent* skelMeshComp, F
 
 	}
 
+	InitAnimationController(sequenceLenght, numFrames, controller);
+}
 
+void ClipController::InitAnimationController(float playLenght, int keysASecond, AnimationDataController* cont)
+{
+	keyFrames.clipduration = playLenght;
+	keyFrames.speed = 1.0;
+	
+	FString rootName = cont->bonesNames->GetData()[0];
+	int sample = cont->data[rootName]->Num();
+
+	float distanceBetweenFames = playLenght / keysASecond;
+
+	float totalTime = 0;
+
+	for (int i = 0; i < sample-1; i++)
+	{
+		KeyFrames frame;
+		frame.startTime = totalTime;
+		frame.endTime = totalTime + distanceBetweenFames;
+		frame.keyFrameParam = 0;
+		frame.curTime = 0;
+
+		keyFrames.frames.Add(frame);
+
+		totalTime += distanceBetweenFames;
+	}
+
+	keyFrames.clipPeram = 0;
+	keyFrames.keyFrameIndex = 0;
+	keyFrames.curTime = 0;
+	keyFrames.clipduration = totalTime;//this might be wrong
 }
 
 void ClipController::UpdateClipController(float dt, UModifiedPoseableMeshComponent* mesh, USkeletalMeshComponent* skelMeshComp, FTransform lookAtEffector)
 {
 
+	keyFrames.curTime += dt * keyFrames.speed;
 
-	currClipTime += dt * currClip->RateScale; //Add reverse playback here too
-
-	if (currClipTime > currClip->GetPlayLength()) 
+	if (currClipTime > currClip->GetPlayLength())
 	{
 		//Handle looping
 		currClipTime = 0;
 	}
+
+	if (keyFrames.curTime > keyFrames.clipduration)
+	{
+		float overflowTime = keyFrames.curTime - keyFrames.clipduration;
+
+		//Accounts for overflow time steps that are longer than the clip duration
+		while (overflowTime > keyFrames.clipduration)
+		{
+			overflowTime -= keyFrames.clipduration;
+		}
+
+		//just loops rn
+		keyFrames.keyFrameIndex = 0;
+		keyFrames.curTime = overflowTime;
+
+	}
+	else if (contrl->clipTime < 0)  //For reverse transition if clip time goes below 0
+	{
+		float overflowTime = -contrl->clipTime;
+
+		//Accounts for overflow time steps that are longer than the clip duration
+		while (overflowTime > clipDuration)
+		{
+			overflowTime -= clipDuration;
+		}
+
+		//pause if go past the start of the clip
+		//contrl->speed = 0;
+		contrl->clipTime = 0;
+		contrl->currentkeyFrameIndex = 0;
+	}
+
+	////Finds current keyframe based on transitions and updated clip time
+
+	//Picks a starting keyframe - 
+	float keyFrameStartTime_T0 = contrl->keyFrames[contrl->currentkeyFrameIndex]->start;
+	float keyFrameEndTime_T1 = contrl->keyFrames[contrl->currentkeyFrameIndex]->end;
+
+	// keyFrameStartTime_T0 = clipCtrl->clipPool->sample[clipCtrl->keyframe[clipCtrl->keyframeIndex].sampleIndex0].time_sec;
+	//a3f64 keyFrameEndTime_T1 = clipCtrl->clipPool->sample[clipCtrl->keyframe[clipCtrl->keyframeIndex].sampleIndex1].time_sec;
+
+	//Makes sure it is the current keyframe Tristan created and refactored/imroved by Will and Tristan
+	while (contrl->clipTime >= keyFrameEndTime_T1 || contrl->clipTime < keyFrameStartTime_T0)
+	{
+		//clipCtrl->clipPool->clip->keyframeDirection > 0 ? clipCtrl->keyframeIndex++ : clipCtrl->keyframeIndex--;
+
+		contrl->currentkeyFrameIndex++;
+
+		if (contrl->currentkeyFrameIndex < contrl->keyFrames.Num())
+		{
+			keyFrameStartTime_T0 = contrl->keyFrames[contrl->currentkeyFrameIndex]->start;
+			keyFrameEndTime_T1 = contrl->keyFrames[contrl->currentkeyFrameIndex]->end;
+
+			//keyFrameStartTime_T0 = clipCtrl->clipPool->sample[clipCtrl->keyframe[clipCtrl->keyframeIndex].sampleIndex0].time_sec;
+			//keyFrameEndTime_T1 = clipCtrl->clipPool->sample[clipCtrl->keyframe[clipCtrl->keyframeIndex].sampleIndex1].time_sec;
+		}
+
+		////Don't need to account for if index goes out of range here since that is done in the transitions section
+
+	}
+
+	////Gets normalized time for current keyframe and clip - Base created by Tristan and refactored/imroved by Will and Tristan
+	//clipCtrl->keyframeParam = (clipCtrl->clipTime_sec - keyFrameStartTime_T0) * clipCtrl->keyframe[clipCtrl->keyframeIndex].durationInv;
+	contrl->keyFrames[contrl->currentkeyFrameIndex]->deltaKeyframe = (keyFrameEndTime_T1 - contrl->clipTime) / (contrl->keyFrames[contrl->currentkeyFrameIndex]->duration); //this needs to be keyframediation
+	contrl->deltaClipTime = (contrl->clipDuration - contrl->clipTime) / contrl->clipDuration;
+	//clipCtrl->clipParam = clipCtrl->clip->duration_sec * clipCtrl->clip->durationInv;
 
 	FCompactPose outPose;
 	FBlendedCurve outCurve;
