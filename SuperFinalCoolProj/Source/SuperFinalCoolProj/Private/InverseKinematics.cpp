@@ -3,6 +3,7 @@
 
 #include "InverseKinematics.h"
 
+//Tristan made this
 int InverseKinematics::UpdateFullIK(UModifiedPoseableMeshComponent* mesh)
 {
 	TArray<FName> names;
@@ -24,12 +25,14 @@ int InverseKinematics::UpdateFullIK(UModifiedPoseableMeshComponent* mesh)
 	return 1;
 }
 
+//Tristan made this
 int InverseKinematics::SolveRootIK(UModifiedPoseableMeshComponent* mesh, FName name)
 {
 	mesh->SetBoneSpaceTranformByName(mesh->GetBoneTransformByName(name, EBoneSpaces::ComponentSpace), name);
 	return 1;
 }
 
+//Tristan made this
 int InverseKinematics::SolveSingleIK(UModifiedPoseableMeshComponent* mesh, FName name, FName parentName)
 {
 	FTransform parentInvT = mesh->GetBoneTransformByName(parentName, EBoneSpaces::ComponentSpace).Inverse();
@@ -39,13 +42,14 @@ int InverseKinematics::SolveSingleIK(UModifiedPoseableMeshComponent* mesh, FName
 	return 1;
 }
 
-
+//Tristan made this
 int InverseKinematics::UpdateEffectors(UModifiedPoseableMeshComponent* mesh, FTransform effectorT)
 {
 	InverseKinematics::UpdateLookAt(mesh, effectorT);
 	return 1;
 }
 
+//Tristan made this
 void InverseKinematics::ResolvePostEffectorIK(UModifiedPoseableMeshComponent* mesh, FTransform jToObj, FName name)
 {
 	FTransform localBone = mesh->SkeletalMesh->RefSkeleton.GetRefBonePose()[mesh->GetBoneIndex(name)];
@@ -67,6 +71,7 @@ void InverseKinematics::ResolvePostEffectorIK(UModifiedPoseableMeshComponent* me
 	//mesh->SetBoneSpaceTranformByName(deconcatted, name);
 }
 
+//Tristan made this
 void InverseKinematics::UpdateLookAt(UModifiedPoseableMeshComponent* mesh, FTransform effectorT)
 {
 	FName name("Neck");

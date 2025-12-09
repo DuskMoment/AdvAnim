@@ -3,6 +3,7 @@
 
 #include "ForwardKinematics.h"
 
+//Tristan made this and Will editted for other potential implimentation
 int ForwardKinematics::UpdateFK(UPoseableMeshComponent* mesh, FCompactPose& animPoses)
 {
 	////GetAnimationPose() does concat already
@@ -35,6 +36,7 @@ int ForwardKinematics::UpdateFK(UPoseableMeshComponent* mesh, FCompactPose& anim
 	return 1;
 }
 
+//Tristan made this
 int ForwardKinematics::SolvePartialFK(UPoseableMeshComponent* mesh, FCompactPose& animPoses)
 {
 	TArray<FName> names;
@@ -56,6 +58,7 @@ int ForwardKinematics::SolvePartialFK(UPoseableMeshComponent* mesh, FCompactPose
 	return 1;
 }
 
+//Tristan made this
 int ForwardKinematics::SolveRootFK(UPoseableMeshComponent* mesh, FCompactPose& animPoses, FName name)
 {
 	FCompactPoseBoneIndex boneIndex = FCompactPoseBoneIndex(mesh->GetBoneIndex(name));
@@ -63,6 +66,7 @@ int ForwardKinematics::SolveRootFK(UPoseableMeshComponent* mesh, FCompactPose& a
 	return 1;
 }
 
+//Tristan made this
 int ForwardKinematics::SolveSingleFK(UPoseableMeshComponent* mesh, FCompactPose& animPoses, FName name, FName parentName)
 {
 	FCompactPoseBoneIndex boneIndex = FCompactPoseBoneIndex(mesh->GetBoneIndex(name));
@@ -71,7 +75,6 @@ int ForwardKinematics::SolveSingleFK(UPoseableMeshComponent* mesh, FCompactPose&
 	//FTransform currentT = mesh->GetBoneSpaceTransforms()[localBoneIndex];
 
 	FTransform parentT = mesh->GetBoneTransformByName(parentName, EBoneSpaces::ComponentSpace);
-	FTransform newT((parentT.ToMatrixWithScale() * animPoses[boneIndex].ToMatrixWithScale()));
 
 	mesh->SetBoneTransformByName(name, animPoses[boneIndex] * parentT, EBoneSpaces::ComponentSpace);
 

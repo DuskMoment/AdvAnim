@@ -3,6 +3,8 @@
 
 #include "Effector.h"
 
+////Tristan made all this
+
 // Sets default values
 AEffector::AEffector()
 {

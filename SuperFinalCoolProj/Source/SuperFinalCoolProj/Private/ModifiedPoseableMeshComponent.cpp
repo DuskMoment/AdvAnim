@@ -3,12 +3,14 @@
 
 #include "ModifiedPoseableMeshComponent.h"
 
+//Tristan made this
 void UModifiedPoseableMeshComponent::SetBoneSpaceTranformByName(FTransform transform, FName name)
 {
 	int index = GetBoneIndex(name);
 	BoneSpaceTransforms[index] = transform;
 }
 
+//Tristan made this
 FTransform* UModifiedPoseableMeshComponent::GetBoneSpaceTranformRefByName(FName name)
 {
 	int index = GetBoneIndex(name);

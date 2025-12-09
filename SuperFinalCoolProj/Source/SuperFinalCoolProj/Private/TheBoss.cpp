@@ -119,6 +119,7 @@ void ATheBoss::Tick(float DeltaTime)
 	//will made this
 	controller->UpdateClipController(DeltaTime, mesh, skelMeshComp, lookAtEffector->GetActorTransform());
 
+	//Tristan made this
 	if (blendSkel1 && blendSkel2) {
 		lerpU = FMath::Clamp(lerpU, 0, 1);
 		blendTree->Execute(lerpU);
@@ -131,6 +132,7 @@ void ATheBoss::Tick(float DeltaTime)
 	//node->SetLocation(node->GetLocation() + (FVector::UpVector * 10));
 }
 
+//Will made this
 void ATheBoss::ApplyChangeToMesh(FName boneName)
 {
 	BoneDataNode* node = pH->FindBoneByName(boneName);

@@ -11,12 +11,14 @@ BlendTree::~BlendTree()
 {
 }
 
+//Tristan made this
 void BlendTree::CreateTree(UModifiedPoseableMeshComponent* meshHeirarchy)
 {
 	blendTree.heirarchyDescriptor = meshHeirarchy;
 	blendTree.nodes.Init({}, meshHeirarchy->GetNumBones());
 }
 
+//Tristan made this
 void BlendTree::ConfigureNode(FName name, FTransform* outPose, FTransform* inPose1, FTransform* inPose2, BlendOps blendOp)
 {
 	int nodeIndex = blendTree.heirarchyDescriptor->GetBoneIndex(name);
@@ -31,6 +33,7 @@ void BlendTree::ConfigureNode(FName name, FTransform* outPose, FTransform* inPos
 	blendTree.nodes[nodeIndex] = newNode;
 }
 
+//Tristan and Will made this
 void BlendTree::Execute(float u)
 {
 	TArray<FName> poseNames;
@@ -61,6 +64,7 @@ void BlendTree::Execute(float u)
 	}
 }
 
+//Tristan made this
 FVector BlendTree::Lerp(FVector v0, FVector v1, float u)
 {
 	FVector out;
@@ -70,6 +74,7 @@ FVector BlendTree::Lerp(FVector v0, FVector v1, float u)
 	return out;
 }
 
+//Tristan made this
 FVector BlendTree::Add(FVector v0, FVector v1)
 {
 	FVector out;
