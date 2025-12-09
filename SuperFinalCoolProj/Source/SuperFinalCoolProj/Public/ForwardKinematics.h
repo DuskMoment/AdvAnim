@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ClipController.h"
 #include "Components/PoseableMeshComponent.h"
 
 /**
@@ -14,8 +15,9 @@ public:
 	ForwardKinematics() = delete;
 	~ForwardKinematics() = delete;
 
-	static int UpdateFK(UPoseableMeshComponent* mesh, FCompactPose& animPoses);
-	static int SolvePartialFK(UPoseableMeshComponent* mesh, FCompactPose& animPoses);
-	static int SolveRootFK(UPoseableMeshComponent* mesh, FCompactPose& animPoses, FName name);
-	static int SolveSingleFK(UPoseableMeshComponent* mesh, FCompactPose& animPoses, FName name, FName parentName);
+	static int UpdateFK(UPoseableMeshComponent* mesh, TArray<FTransform>& animPose, ClipController::AnimationDataController* controller);
+	static int SolvePartialFK(UPoseableMeshComponent* mesh, TArray<FTransform>& animPose,ClipController::AnimationDataController& controller);
+	static int SolveRootFK(UPoseableMeshComponent* mesh, TArray<FTransform>& animPose, int index, FName name);
+	static int SolveSingleFK(UPoseableMeshComponent* mesh, TArray<FTransform>& animPose, int index, FName childName, FName parentName);
+	static int BlendPoses(ClipController::ClipKeyframes frames, int keyFrame, ClipController::AnimationDataController* input, TArray<FTransform>& outPose);
 };

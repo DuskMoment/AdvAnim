@@ -34,6 +34,8 @@ public:
 		FVector* location;
 		FVector* rotaion;
 		float scale;
+
+		int parentIndex;
 	};
 
 	struct AnimationDataController
@@ -56,6 +58,7 @@ public:
 	struct KeyFrames
 	{
 		float startTime;
+		float duration;
 		float endTime;
 		int curTime;
 		float keyFrameParam;

@@ -3,7 +3,7 @@
 
 #include "ForwardKinematics.h"
 
-int ForwardKinematics::UpdateFK(UPoseableMeshComponent* mesh, FCompactPose& animPoses)
+int ForwardKinematics::UpdateFK(UPoseableMeshComponent* mesh, TArray<FTransform>& animPose, ClipController::AnimationDataController* controller)
 {
 	////GetAnimationPose() does concat already
 	// 
@@ -30,12 +30,12 @@ int ForwardKinematics::UpdateFK(UPoseableMeshComponent* mesh, FCompactPose& anim
 	//	//mesh->GetBoneSpaceTransforms();
 	//}
 
-	ForwardKinematics::SolvePartialFK(mesh, animPoses);
+	ForwardKinematics::SolvePartialFK(mesh, animPose, *controller);
 
 	return 1;
 }
 
-int ForwardKinematics::SolvePartialFK(UPoseableMeshComponent* mesh, FCompactPose& animPoses)
+int ForwardKinematics::SolvePartialFK(UPoseableMeshComponent* mesh, TArray<FTransform>& animPoses, ClipController::AnimationDataController& data)
 {
 	TArray<FName> names;
 	mesh->GetBoneNames(names);
@@ -45,37 +45,69 @@ int ForwardKinematics::SolvePartialFK(UPoseableMeshComponent* mesh, FCompactPose
 		FName parentName = mesh->GetParentBone(names[i]);
 		if (parentName == NAME_None)
 		{
-			ForwardKinematics::SolveRootFK(mesh, animPoses, names[i]);
+			ForwardKinematics::SolveRootFK(mesh, animPoses, i, names[i]);
 		}
 		else
 		{
-			ForwardKinematics::SolveSingleFK(mesh, animPoses, names[i], parentName);
+			ForwardKinematics::SolveSingleFK(mesh, animPoses, i, names[i], parentName);
 		}
 	}
 
 	return 1;
 }
 
-int ForwardKinematics::SolveRootFK(UPoseableMeshComponent* mesh, FCompactPose& animPoses, FName name)
+int ForwardKinematics::SolveRootFK(UPoseableMeshComponent* mesh, TArray<FTransform>& animPose, int index, FName name)
 {
 	FCompactPoseBoneIndex boneIndex = FCompactPoseBoneIndex(mesh->GetBoneIndex(name));
-	mesh->SetBoneTransformByName(name, animPoses[boneIndex], EBoneSpaces::ComponentSpace);
+	mesh->SetBoneTransformByName(name, animPose[index], EBoneSpaces::ComponentSpace);
 	return 1;
 }
 
-int ForwardKinematics::SolveSingleFK(UPoseableMeshComponent* mesh, FCompactPose& animPoses, FName name, FName parentName)
+int ForwardKinematics::SolveSingleFK(UPoseableMeshComponent* mesh, TArray<FTransform>& animPose, int index, FName childName, FName parentName)
 {
-	FCompactPoseBoneIndex boneIndex = FCompactPoseBoneIndex(mesh->GetBoneIndex(name));
-	int localBoneIndex = mesh->GetBoneIndex(name);
+	//FCompactPoseBoneIndex boneIndex = FCompactPoseBoneIndex(mesh->GetBoneIndex(name));
+	//int localBoneIndex = mesh->GetBoneIndex(name);
 
 	//FTransform currentT = mesh->GetBoneSpaceTransforms()[localBoneIndex];
 
 	FTransform parentT = mesh->GetBoneTransformByName(parentName, EBoneSpaces::ComponentSpace);
-	FTransform newT((parentT.ToMatrixWithScale() * animPoses[boneIndex].ToMatrixWithScale()));
+	FTransform newT((parentT.ToMatrixWithScale() * animPose[index].ToMatrixWithScale()));
 
-	mesh->SetBoneTransformByName(name, animPoses[boneIndex] * parentT, EBoneSpaces::ComponentSpace);
+	mesh->SetBoneTransformByName(childName, animPose[index] * parentT, EBoneSpaces::ComponentSpace);
 
 	//mesh->SetBoneRotationByName(name, (parentT.GetRotation() * animPoses[boneIndex].GetRotation()).Rotator(), EBoneSpaces::ComponentSpace);
 	//mesh->SetBoneLocationByName(name, animPoses[boneIndex].GetLocation(), EBoneSpaces::ComponentSpace);
 	return 1;
+}
+
+int ForwardKinematics::BlendPoses(ClipController::ClipKeyframes frames, int keyFrame, ClipController::AnimationDataController* input, TArray<FTransform>& outPose)
+{
+
+	TArray<FString> boneNames = *input->bonesNames;
+	
+	//get the current frame
+	ClipController::KeyFrames key = frames.frames[keyFrame];
+	float interpolation = key.keyFrameParam;
+
+	outPose.Empty();
+	//somthing w
+
+	for (int i = 0; i < input->bonesNames->Num(); i++)
+	{
+		FTransform lerpedPos;
+		FString name = boneNames[i];
+		ClipController::AnimationData* pose1 = input->data[name]->GetData()[keyFrame];
+		ClipController::AnimationData* pose2 = input->data[name]->GetData()[keyFrame + 1];
+
+		lerpedPos.SetLocation(FMath::Lerp(pose2->transform.GetLocation(), pose1->transform.GetLocation(), interpolation));
+
+		FVector rotated = FMath::Lerp(pose2->transform.GetRotation().Euler(), pose1->transform.GetRotation().Euler(), interpolation);
+		FRotator blendRotator(rotated.X, rotated.Y, rotated.Z);
+		lerpedPos.SetRotation(blendRotator.Quaternion());
+
+		lerpedPos.SetScale3D(FMath::Lerp(pose2->transform.GetScale3D(), pose1->transform.GetScale3D(), interpolation));
+
+		outPose.Add(lerpedPos);
+	}
+	return 0;
 }

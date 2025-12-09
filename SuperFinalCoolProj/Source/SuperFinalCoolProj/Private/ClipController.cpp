@@ -69,7 +69,8 @@ void ClipController::GetCurvesFromUAsset(USkeletalMeshComponent* skelMeshComp, F
 		{
 			FTransform pose = OutPose.GetBones()[j];
 			FString boneName = BoneContainer.GetReferenceSkeleton().GetBoneName(j).ToString();
-			
+			int parentIndex = BoneContainer.GetReferenceSkeleton().GetParentIndex(j);
+			FString parentBoneName = BoneContainer.GetReferenceSkeleton().GetBoneName(parentIndex).ToString();
 			//not int he list of bone names
 			if (!controller->bonesNames->Contains((FName)boneName))
 			{
@@ -85,6 +86,7 @@ void ClipController::GetCurvesFromUAsset(USkeletalMeshComponent* skelMeshComp, F
 			//add new anim data
 			AnimationData* animData = new AnimationData();
 			animData->transform = pose;
+			animData->parentIndex = parentIndex;
 			controller->data[boneName]->Add(animData);
 
 
@@ -114,6 +116,7 @@ void ClipController::InitAnimationController(float playLenght, int keysASecond, 
 		frame.endTime = totalTime + distanceBetweenFames;
 		frame.keyFrameParam = 0;
 		frame.curTime = 0;
+		frame.duration = frame.endTime - frame.startTime;
 
 		keyFrames.frames.Add(frame);
 
@@ -152,45 +155,40 @@ void ClipController::UpdateClipController(float dt, UModifiedPoseableMeshCompone
 		keyFrames.curTime = overflowTime;
 
 	}
-	else if (contrl->clipTime < 0)  //For reverse transition if clip time goes below 0
+	else if (keyFrames.curTime < 0)  //For reverse transition if clip time goes below 0
 	{
-		float overflowTime = -contrl->clipTime;
+		float overflowTime = -keyFrames.curTime;
 
 		//Accounts for overflow time steps that are longer than the clip duration
-		while (overflowTime > clipDuration)
+		while (overflowTime > keyFrames.clipduration)
 		{
-			overflowTime -= clipDuration;
+			overflowTime -= keyFrames.clipduration;
 		}
 
 		//pause if go past the start of the clip
-		//contrl->speed = 0;
-		contrl->clipTime = 0;
-		contrl->currentkeyFrameIndex = 0;
+		keyFrames.speed = 0;
+		keyFrames.curTime = 0;
+		keyFrames.keyFrameIndex= 0;
 	}
 
 	////Finds current keyframe based on transitions and updated clip time
 
 	//Picks a starting keyframe - 
-	float keyFrameStartTime_T0 = contrl->keyFrames[contrl->currentkeyFrameIndex]->start;
-	float keyFrameEndTime_T1 = contrl->keyFrames[contrl->currentkeyFrameIndex]->end;
-
-	// keyFrameStartTime_T0 = clipCtrl->clipPool->sample[clipCtrl->keyframe[clipCtrl->keyframeIndex].sampleIndex0].time_sec;
-	//a3f64 keyFrameEndTime_T1 = clipCtrl->clipPool->sample[clipCtrl->keyframe[clipCtrl->keyframeIndex].sampleIndex1].time_sec;
+	float keyFrameStartTime_T0 = keyFrames.frames[keyFrames.keyFrameIndex].startTime;
+	float keyFrameEndTime_T1 = keyFrames.frames[keyFrames.keyFrameIndex].endTime;
 
 	//Makes sure it is the current keyframe Tristan created and refactored/imroved by Will and Tristan
-	while (contrl->clipTime >= keyFrameEndTime_T1 || contrl->clipTime < keyFrameStartTime_T0)
+	while (keyFrames.curTime >= keyFrameEndTime_T1 || keyFrames.curTime < keyFrameStartTime_T0)
 	{
 		//clipCtrl->clipPool->clip->keyframeDirection > 0 ? clipCtrl->keyframeIndex++ : clipCtrl->keyframeIndex--;
 
-		contrl->currentkeyFrameIndex++;
+		keyFrames.keyFrameIndex++;
 
-		if (contrl->currentkeyFrameIndex < contrl->keyFrames.Num())
+		if (keyFrames.keyFrameIndex < keyFrames.frames.Num())
 		{
-			keyFrameStartTime_T0 = contrl->keyFrames[contrl->currentkeyFrameIndex]->start;
-			keyFrameEndTime_T1 = contrl->keyFrames[contrl->currentkeyFrameIndex]->end;
+			keyFrameStartTime_T0 = keyFrames.frames[keyFrames.keyFrameIndex].startTime;
+			keyFrameEndTime_T1 = keyFrames.frames[keyFrames.keyFrameIndex].endTime;
 
-			//keyFrameStartTime_T0 = clipCtrl->clipPool->sample[clipCtrl->keyframe[clipCtrl->keyframeIndex].sampleIndex0].time_sec;
-			//keyFrameEndTime_T1 = clipCtrl->clipPool->sample[clipCtrl->keyframe[clipCtrl->keyframeIndex].sampleIndex1].time_sec;
 		}
 
 		////Don't need to account for if index goes out of range here since that is done in the transitions section
@@ -198,11 +196,9 @@ void ClipController::UpdateClipController(float dt, UModifiedPoseableMeshCompone
 	}
 
 	////Gets normalized time for current keyframe and clip - Base created by Tristan and refactored/imroved by Will and Tristan
-	//clipCtrl->keyframeParam = (clipCtrl->clipTime_sec - keyFrameStartTime_T0) * clipCtrl->keyframe[clipCtrl->keyframeIndex].durationInv;
-	contrl->keyFrames[contrl->currentkeyFrameIndex]->deltaKeyframe = (keyFrameEndTime_T1 - contrl->clipTime) / (contrl->keyFrames[contrl->currentkeyFrameIndex]->duration); //this needs to be keyframediation
-	contrl->deltaClipTime = (contrl->clipDuration - contrl->clipTime) / contrl->clipDuration;
-	//clipCtrl->clipParam = clipCtrl->clip->duration_sec * clipCtrl->clip->durationInv;
-
+	keyFrames.frames[keyFrames.keyFrameIndex].keyFrameParam = (keyFrameEndTime_T1 - keyFrames.curTime) / (keyFrames.frames[keyFrames.keyFrameIndex].duration); //this needs to be keyframediation
+	keyFrames.clipPeram = (keyFrames.clipduration - keyFrames.curTime) / keyFrames.clipduration;
+	
 	FCompactPose outPose;
 	FBlendedCurve outCurve;
 	FStackCustomAttributes OutAttr;
@@ -218,7 +214,11 @@ void ClipController::UpdateClipController(float dt, UModifiedPoseableMeshCompone
 	//Updates poseable mesh bones with animation poses
 	FCompactPose OutPose = poseData.GetPose();
 
-	ForwardKinematics::UpdateFK(mesh, OutPose);
+
+	TArray<FTransform> testOutPose;
+	ForwardKinematics::BlendPoses(keyFrames, keyFrames.curTime, animationMap["cap"], testOutPose);
+
+	ForwardKinematics::UpdateFK(mesh, testOutPose, animationMap["cap"]);
 	InverseKinematics::UpdateEffectors(mesh, lookAtEffector);
 	//ForwardKinematics::UpdateFK(mesh, OutPose);
 }
