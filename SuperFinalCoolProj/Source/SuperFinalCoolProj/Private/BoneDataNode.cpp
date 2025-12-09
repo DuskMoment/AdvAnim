@@ -3,6 +3,7 @@
 
 #include "BoneDataNode.h"
 
+//Will made all of these one liner functions
 BoneDataNode::BoneDataNode()
 {
 }

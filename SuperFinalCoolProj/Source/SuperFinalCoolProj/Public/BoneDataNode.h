@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 
 /**
- * 
+ *  will made this class bone relations where done based off of names and matches in alist
  */
 class SUPERFINALCOOLPROJ_API BoneDataNode
 {
@@ -23,8 +23,6 @@ public:
 	void SetLocation(FVector inputLocation);
 	void SetRotation(FQuat inputRotation);
 	void SetScale(FVector intputScale);
-
-
 
 	~BoneDataNode();
 

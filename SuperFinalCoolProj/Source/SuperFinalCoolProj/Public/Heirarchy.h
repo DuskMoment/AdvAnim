@@ -5,10 +5,9 @@
 #include "BoneDataNode.h"
 #include "CoreMinimal.h"
 
-
-/**
- * 
- */
+//this class was supposed to hold the intermedate data before up push all of the updated to the skeleton
+//it did not work that way
+//will made this class
 class SUPERFINALCOOLPROJ_API Heirarchy
 {
 private:

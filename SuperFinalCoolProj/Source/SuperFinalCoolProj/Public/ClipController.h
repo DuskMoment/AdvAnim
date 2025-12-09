@@ -16,6 +16,7 @@ public:
 	ClipController();
 	~ClipController();
 
+	//used to update the clip controller
 	void UpdateClipController(float dt, UModifiedPoseableMeshComponent* mesh, USkeletalMeshComponent* skelMeshComp, FTransform lookAtEffector);
 
 	BoneDataNode* GetAssetData();
@@ -24,6 +25,7 @@ public:
 	float currClipTime;
 	float currClipTimeNormalized;
 
+	//stores local animation data
 	struct AnimationData
 	{
 		FVector* location;
@@ -31,6 +33,7 @@ public:
 		float scale;
 	};
 
+	//strose a map of joints to animation poese
 	struct AnimationDataController
 	{
 		//bones used in the animation
@@ -51,6 +54,7 @@ public:
 private:
 
 	UPROPERTY()
+	//contains the map of animationnames to dataControllers
 	TMap<FString, AnimationDataController*> animationMap;
 	
 

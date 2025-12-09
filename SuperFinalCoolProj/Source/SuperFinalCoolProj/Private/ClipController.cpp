@@ -15,6 +15,7 @@ ClipController::~ClipController()
 {
 }
 
+//will and tristan made this function
 void ClipController::UpdateClipController(float dt, UModifiedPoseableMeshComponent* mesh, 
 	USkeletalMeshComponent* skelMeshComp, FTransform lookAtEffector)
 {
@@ -46,6 +47,7 @@ void ClipController::UpdateClipController(float dt, UModifiedPoseableMeshCompone
 	//ForwardKinematics::UpdateFK(mesh, OutPose);
 }
 
+//will made this function loads the HTR file and places it into anim data
 BoneDataNode* ClipController::GetAssetData()
 {
 	FString FilePath = FPaths::ProjectContentDir() + TEXT("/xbot_loco.htr");

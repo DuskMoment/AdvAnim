@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
+//will made all of these functions
 #include "Heirarchy.h"
 
 Heirarchy::Heirarchy()

@@ -68,10 +68,11 @@ void ATheBoss::BeginPlay()
 	mesh->GetBoneNames(names);
 	mesh->bDisplayBones = true;
 
+	//will made this function
 	size_t boneCount = mesh->GetNumBones();
 	for (int i = 0; i < names.Num(); i++)
 	{
-		//get all of the data and plasice it into a struct
+		//get all of the data and place it into a struct
 		FTransform trans = mesh->GetBoneTransform(names[i], RTS_Component);
 		FVector loc = mesh->GetBoneLocation(names[i], EBoneSpaces::ComponentSpace);
 		FQuat quat = mesh->GetBoneQuaternion(names[i], EBoneSpaces::ComponentSpace);
@@ -90,6 +91,7 @@ void ATheBoss::BeginPlay()
 			animClip->GetPlayLength();
 			animClip->GetAnimationPose(*t, FAnimExtractContext());*/
 
+		//tristan made this 
 		if (blendSkel1 && blendSkel2) {
 			FTransform* out = mesh->GetBoneSpaceTranformRefByName(names[i]);
 			FTransform* in1 = blendSkel1->mesh->GetBoneSpaceTranformRefByName(names[i]);
@@ -114,6 +116,7 @@ void ATheBoss::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	//will made this
 	controller->UpdateClipController(DeltaTime, mesh, skelMeshComp, lookAtEffector->GetActorTransform());
 
 	if (blendSkel1 && blendSkel2) {
