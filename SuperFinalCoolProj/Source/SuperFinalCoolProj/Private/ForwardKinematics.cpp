@@ -66,7 +66,7 @@ int ForwardKinematics::SolveRootFK(UPoseableMeshComponent* mesh, FCompactPose& a
 	return 1;
 }
 
-//Tristan made this
+//Tristan made this and will edited for other implimentetations
 int ForwardKinematics::SolveSingleFK(UPoseableMeshComponent* mesh, FCompactPose& animPoses, FName name, FName parentName)
 {
 	FCompactPoseBoneIndex boneIndex = FCompactPoseBoneIndex(mesh->GetBoneIndex(name));
