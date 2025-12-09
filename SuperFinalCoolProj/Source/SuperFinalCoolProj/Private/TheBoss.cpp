@@ -117,7 +117,8 @@ void ATheBoss::Tick(float DeltaTime)
 	controller->UpdateClipController(DeltaTime, mesh, skelMeshComp, lookAtEffector->GetActorTransform());
 
 	if (blendSkel1 && blendSkel2) {
-		blendTree->Execute(0.5);
+		lerpU = FMath::Clamp(lerpU, 0, 1);
+		blendTree->Execute(lerpU);
 	}
 
 	//RightUpLeg

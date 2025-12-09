@@ -64,6 +64,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	ATheBoss* blendSkel2;
 
+	UPROPERTY(EditAnywhere)
+	float lerpU;
 
 private:
 	void ApplyChangeToMesh(FName boneName);

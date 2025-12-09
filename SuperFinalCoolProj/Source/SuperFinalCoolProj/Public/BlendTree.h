@@ -45,4 +45,5 @@ private:
 
 	//BlendOp Functions
 	FVector Lerp(FVector v0, FVector v1, float u);
+	FVector Add(FVector v0, FVector v1);
 };

@@ -48,13 +48,15 @@ int InverseKinematics::UpdateEffectors(UModifiedPoseableMeshComponent* mesh, FTr
 
 void InverseKinematics::ResolvePostEffectorIK(UModifiedPoseableMeshComponent* mesh, FTransform jToObj, FName name)
 {
+	FTransform localBone = mesh->SkeletalMesh->RefSkeleton.GetRefBonePose()[mesh->GetBoneIndex(name)];
+	FTransform delta = mesh->GetBoneSpaceTransforms()[mesh->GetBoneIndex(name)];
+
 	//Update object bone pose
 	mesh->SetBoneTransformByName(name, jToObj, EBoneSpaces::ComponentSpace);
 
 	//Solve for local bone pose
 	SolveSingleIK(mesh, name, mesh->GetParentBone(name));
 
-	FTransform localBone = mesh->SkeletalMesh->RefSkeleton.GetRefBonePose()[mesh->GetBoneIndex(name)];
 	FTransform deconcatted = mesh->GetBoneSpaceTransforms()[mesh->GetBoneIndex(name)];
 
 	//Deconcat for saving to anim pose for FK again if needed
