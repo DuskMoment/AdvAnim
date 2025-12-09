@@ -3,13 +3,7 @@
 
 #include "InverseKinematics.h"
 
-int InverseKinematics::UpdateFullIK(UModifiedPoseableMeshComponent* mesh, FCompactPose& animPoses)
-{
-	InverseKinematics::SolvePartialIK(mesh, animPoses);
-	return 1;
-}
-
-int InverseKinematics::SolvePartialIK(UModifiedPoseableMeshComponent* mesh, FCompactPose& animPoses)
+int InverseKinematics::UpdateFullIK(UModifiedPoseableMeshComponent* mesh)
 {
 	TArray<FName> names;
 	mesh->GetBoneNames(names);
@@ -19,7 +13,7 @@ int InverseKinematics::SolvePartialIK(UModifiedPoseableMeshComponent* mesh, FCom
 		FName parentName = mesh->GetParentBone(names[i]);
 		if (parentName == NAME_None)
 		{
-			InverseKinematics::SolveRootIK(mesh, animPoses, names[i]);
+			InverseKinematics::SolveRootIK(mesh, names[i]);
 		}
 		else
 		{
@@ -30,7 +24,7 @@ int InverseKinematics::SolvePartialIK(UModifiedPoseableMeshComponent* mesh, FCom
 	return 1;
 }
 
-int InverseKinematics::SolveRootIK(UModifiedPoseableMeshComponent* mesh, FCompactPose& animPoses, FName name)
+int InverseKinematics::SolveRootIK(UModifiedPoseableMeshComponent* mesh, FName name)
 {
 	mesh->SetBoneSpaceTranformByName(mesh->GetBoneTransformByName(name, EBoneSpaces::ComponentSpace), name);
 	return 1;
@@ -55,7 +49,7 @@ int InverseKinematics::UpdateEffectors(UModifiedPoseableMeshComponent* mesh, FTr
 void InverseKinematics::ResolvePostEffectorIK(UModifiedPoseableMeshComponent* mesh, FTransform jToObj, FName name)
 {
 	//Update object bone pose
-	mesh->SetBoneRotationByName(name, jToObj.Rotator(), EBoneSpaces::ComponentSpace);
+	mesh->SetBoneTransformByName(name, jToObj, EBoneSpaces::ComponentSpace);
 
 	//Solve for local bone pose
 	SolveSingleIK(mesh, name, mesh->GetParentBone(name));
@@ -74,21 +68,21 @@ void InverseKinematics::ResolvePostEffectorIK(UModifiedPoseableMeshComponent* me
 void InverseKinematics::UpdateLookAt(UModifiedPoseableMeshComponent* mesh, FTransform effectorT)
 {
 	FName name("Neck");
+	FTransform toJointObjectSpace = mesh->GetComponentTransform().Inverse();
 
-	//Joint in world
-	FTransform jToObj = mesh->GetBoneTransformByName(name, EBoneSpaces::WorldSpace);
+	//Joint in component space
+	FTransform jToObj = mesh->GetBoneTransformByName(name, EBoneSpaces::ComponentSpace);
 
-	FTransform compBone = mesh->GetBoneTransformByName(name, EBoneSpaces::ComponentSpace);
-	FTransform localBone = mesh->SkeletalMesh->RefSkeleton.GetRefBonePose()[mesh->GetBoneIndex(name)];
+	FTransform localJoint = mesh->SkeletalMesh->RefSkeleton.GetRefBonePose()[mesh->GetBoneIndex(name)];
 
-	//Hardcoded effector world position for now
 	FVector effectorInWorld = effectorT.GetLocation();
+	FVector effectorInJointObjectSpace = (toJointObjectSpace * effectorT).GetLocation();
 
 	//Making the look at basis
-	FVector fwd = effectorInWorld - jToObj.GetLocation();
+	FVector fwd = effectorInJointObjectSpace - jToObj.GetLocation();
 	fwd.Normalize();
 
-	FVector right = FVector::CrossProduct(-localBone.GetRotation().GetUpVector(), fwd);
+	FVector right = FVector::CrossProduct(-localJoint.GetRotation().GetUpVector(), fwd);
 	right.Normalize();
 
 	FVector up = FVector::CrossProduct(fwd, right);
@@ -111,9 +105,9 @@ void InverseKinematics::UpdateLookAt(UModifiedPoseableMeshComponent* mesh, FTran
 	jToObj.SetRotation((lookAt_Basis).Rotator().Quaternion());
 
 	//Get the affected joint basis to get it's transpose (transpose is inverse for orthonormal basis)
-	FVector jRight = compBone.GetRotation().GetRightVector();
-	FVector jFwd = compBone.GetRotation().GetForwardVector();
-	FVector jUp = compBone.GetRotation().GetUpVector();
+	FVector jRight = localJoint.GetRotation().GetRightVector();
+	FVector jFwd = localJoint.GetRotation().GetForwardVector();
+	FVector jUp = localJoint.GetRotation().GetUpVector();
 	jRight.Normalize();
 	jFwd.Normalize();
 	jUp.Normalize();

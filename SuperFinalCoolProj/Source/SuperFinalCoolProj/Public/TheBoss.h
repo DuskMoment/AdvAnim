@@ -38,6 +38,7 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	UModifiedPoseableMeshComponent* mesh;
+
 	USkeletalMeshComponent* skelMeshComp;
 
 	UPROPERTY(EditAnywhere)

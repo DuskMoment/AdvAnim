@@ -16,9 +16,8 @@ public:
 
 	static int UpdateEffectors(UModifiedPoseableMeshComponent* mesh, FTransform effectorT);
 
-	static int UpdateFullIK(UModifiedPoseableMeshComponent* mesh, FCompactPose& animPoses);
-	static int SolvePartialIK(UModifiedPoseableMeshComponent* mesh, FCompactPose& animPoses);
-	static int SolveRootIK(UModifiedPoseableMeshComponent* mesh, FCompactPose& animPoses, FName name);
+	static int UpdateFullIK(UModifiedPoseableMeshComponent* mesh);
+	static int SolveRootIK(UModifiedPoseableMeshComponent* mesh, FName name);
 	static int SolveSingleIK(UModifiedPoseableMeshComponent* mesh, FName name, FName parentName);
 
 private:

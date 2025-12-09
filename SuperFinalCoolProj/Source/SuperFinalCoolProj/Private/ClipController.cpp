@@ -15,7 +15,8 @@ ClipController::~ClipController()
 {
 }
 
-void ClipController::UpdateClipController(float dt, UModifiedPoseableMeshComponent* mesh, USkeletalMeshComponent* skelMeshComp, FTransform lookAtEffector)
+void ClipController::UpdateClipController(float dt, UModifiedPoseableMeshComponent* mesh, 
+	USkeletalMeshComponent* skelMeshComp, FTransform lookAtEffector)
 {
 	currClipTime += dt * currClip->RateScale; //Add reverse playback here too
 
@@ -47,9 +48,6 @@ void ClipController::UpdateClipController(float dt, UModifiedPoseableMeshCompone
 
 BoneDataNode* ClipController::GetAssetData()
 {
-	//FMemMark Mark(FMemStack::Get());
-	
-
 	FString FilePath = FPaths::ProjectContentDir() + TEXT("/xbot_loco.htr");
 
 	if (!FPlatformFileManager::Get().GetPlatformFile().FileExists(*FilePath))
